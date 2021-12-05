@@ -1,15 +1,21 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from rest_framework import generics, mixins
+
 from .models import User
+from .serializers import UserSerializers
 
 
-class UserListView(APIView):
+class UserListView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
     queryset = User.objects.all()
+    serializer_class = UserSerializers
 
-    def get(self, request):
-        users = User.objects.all()
-        return Response(users)
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
 
 class UserAuthView(APIView):
