@@ -18,8 +18,9 @@ class UserListView(
         return self.list(request, *args, **kwargs)
 
 
-class UserAuthView(APIView):
+class UserAuthView(generics.GenericAPIView):
     queryset = User.objects.all()
+    serializer_class = UserSerializers
 
     def get(self, request):
         content = {"id": "tpdnrzz", "pw": "test123!"}
