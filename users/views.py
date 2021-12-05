@@ -1,8 +1,11 @@
+from django.http import JsonResponse
 from django.core.exceptions import ValidationError
+from django.http.response import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from rest_framework import generics, mixins
+from rest_framework.renderers import JSONRenderer
+
 
 from .models import User
 from .serializers import UserSerializers, UserSignUpSerializers
@@ -37,17 +40,10 @@ class UserSignUpView(generics.GenericAPIView, mixins.CreateModelMixin):
     serializer_class = UserSignUpSerializers
 
     def post(self, request):
-        username = request.data["username"]
-        password = request.data["password"]
-        email = request.data["email"]
-        try:
-            user = User.objects.get(username=username)
-            raise ValidationError("User already exists!")
-        except User.DoesNotExist:
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-            user = User.objects.create(
-                username=username, password=password, email=email
-            )
-            print(user)
+        serializer.save()
+        return Response(status=200)
 
-            return Response(status=200, data={"id": user.username})
+        return ValidationError("Validation Error")
