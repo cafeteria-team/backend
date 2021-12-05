@@ -6,6 +6,8 @@ from rest_framework import generics, mixins
 from .models import User
 from .serializers import UserSerializers
 
+from django.contrib.auth import authenticate, login
+
 
 class UserListView(
     generics.GenericAPIView,
@@ -18,10 +20,12 @@ class UserListView(
         return self.list(request, *args, **kwargs)
 
 
-class UserAuthView(generics.GenericAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializers
-
-    def get(self, request):
-        content = {"id": "tpdnrzz", "pw": "test123!"}
-        return Response(content)
+class UserAuthView(APIView):
+    def post(self, request):
+        user = authenticate(
+            username=request.data["id"], password=request.data["password"]
+        )
+        if user is not None:
+            login(request, user)
+        else:
+            return Response(status=401)
