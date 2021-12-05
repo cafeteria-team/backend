@@ -5,5 +5,4 @@ from django.db import models
 class User(AbstractUser):
     """Custom User Model"""
 
-    birth = models.DateField(blank=True, null=True)
-    superhost = models.BooleanField(default=False)
+    phone = models.CharField(max_length=20)
