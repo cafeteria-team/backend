@@ -22,10 +22,14 @@ class UserListView(
 
 class UserAuthView(APIView):
     def post(self, request):
-        user = authenticate(
-            username=request.data["id"], password=request.data["password"]
-        )
+        username = request.data["username"]
+        password = request.data["password"]
+        user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            return Response(
+                status=200,
+            )
+
         else:
             return Response(status=401)
