@@ -48,7 +48,16 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
+<<<<<<< HEAD
+THIRD_PARTY_APPS = [
+    "django",
+    "rest_framework",
+]
+
+PROJECT_APPS = ["user"]
+=======
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
+>>>>>>> main
 
 
 MIDDLEWARE = [
@@ -147,5 +156,10 @@ STATIC_URL = "/static/"
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+<<<<<<< HEAD
+
+AUTH_USER_MODEL = "user.User"
+=======
 AUTH_USER_MODEL = "users.User"
 CORS_ORIGIN_ALLOW_ALL = True
+>>>>>>> main
