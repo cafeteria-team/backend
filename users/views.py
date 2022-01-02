@@ -1,27 +1,31 @@
-from django.http import JsonResponse
-from django.core.exceptions import ValidationError
-from django.http.response import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics, mixins
-from rest_framework.renderers import JSONRenderer
-
+from drf_yasg.utils import swagger_auto_schema
 
 from .models import User
-from .serializers import UserSerializers, UserSignUpSerializers
+from .serializers import UserSerializer, UserSignUpSerializer, UserSignInSerializer
 
 from django.contrib.auth import authenticate, login
 
 
-class UserListView(generics.GenericAPIView, mixins.ListModelMixin):
-    queryset = User.objects.all()
-    serializer_class = UserSerializers
+class UserListView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
 
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    @swagger_auto_schema(operation_summary="유저 정보")
     def get(self, request, *args, **kwargs):
+
         return self.list(request, *args, **kwargs)
 
 
-class UserLoginView(APIView):
+class UserSignInView(APIView):
+    serializer_class = UserSignInSerializer
+
     def post(self, request):
         username = request.data["username"]
         password = request.data["password"]
@@ -37,13 +41,10 @@ class UserLoginView(APIView):
 
 class UserSignUpView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = User.objects.all()
-    serializer_class = UserSignUpSerializers
+    serializer_class = UserSignUpSerializer
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         serializer.save()
         return Response(status=200)
-
-        return ValidationError("Validation Error")
