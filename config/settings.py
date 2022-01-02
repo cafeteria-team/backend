@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ["*"]
 THIRD_PARTY_APPS = [
     "django",
     "rest_framework",
+    "drf_yasg",
     "corsheaders",
 ]
 
@@ -87,8 +88,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "goodfeteria",
+        "USER": "admin",
+        "PASSWORD": "1q2w3e4r##",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 
@@ -115,7 +120,8 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.BasicAuthentication",
         "rest_framework.authentication.SessionAuthentication",
-    ]
+    ],
+    "EXCEPTION_HANDLER": "config.utils.custom_exception_handler",
 }
 
 # Internationalization
