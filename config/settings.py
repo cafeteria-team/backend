@@ -48,16 +48,7 @@ DJANGO_APPS = [
     "django.contrib.staticfiles",
 ]
 
-<<<<<<< HEAD
-THIRD_PARTY_APPS = [
-    "django",
-    "rest_framework",
-]
-
-PROJECT_APPS = ["user"]
-=======
 INSTALLED_APPS = DJANGO_APPS + PROJECT_APPS + THIRD_PARTY_APPS
->>>>>>> main
 
 
 MIDDLEWARE = [
