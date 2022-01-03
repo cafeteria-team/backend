@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
 from .models import User
 
 
@@ -10,7 +12,13 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserSignInSerializer(serializers.Serializer):
     username = serializers.CharField()
-    password = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+
+
+class UserSignInResponseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username"]
 
 
 class UserSignUpSerializer(serializers.ModelSerializer):
