@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login
+from django.db import transaction
 
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
@@ -50,16 +51,20 @@ class UserSignInView(generics.GenericAPIView):
             )
 
         login(request, user)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class UserSignUpView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = User.objects.all()
     serializer_class = UserSignUpSerializer
 
-    @swagger_auto_schema(operation_summary="유저 생성")
+    @swagger_auto_schema(
+        operation_summary="유저 생성",
+        responses={status.HTTP_201_CREATED: UserSignInResponseSerializer},
+    )
+    @transaction.atomic
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=200)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
