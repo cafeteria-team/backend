@@ -7,6 +7,7 @@ from rest_framework.exceptions import NotFound
 
 from drf_yasg.utils import swagger_auto_schema
 
+
 from .models import User
 from .serializers import (
     UserSerializer,
@@ -60,11 +61,12 @@ class UserSignUpView(generics.GenericAPIView, mixins.CreateModelMixin):
 
     @swagger_auto_schema(
         operation_summary="유저 생성",
-        responses={status.HTTP_201_CREATED: UserSignInResponseSerializer},
+        responses={status.HTTP_201_CREATED: UserSignUpSerializer},
     )
     @transaction.atomic
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        return Response(data=serializer.data, status=status.HTTP_201_OK)
