@@ -37,7 +37,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
 ]
 
-PROJECT_APPS = ["users"]
+PROJECT_APPS = ["users", "store"]
 
 DJANGO_APPS = [
     "django.contrib.admin",
