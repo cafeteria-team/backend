@@ -29,15 +29,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "password", "email", "phone", "store"]
+        fields = ["id", "username", "password", "email", "phone", "role", "store"]
 
     def create(self, validated_data):
         user = User()
+        user_roles = User.UserRoles
+
         user.username = validated_data["username"]
         user.set_password(validated_data["password"])
         user.email = validated_data["email"]
         user.phone = validated_data["phone"]
-        user_roles = user.UserRoles()
 
         if validated_data["role"] == user_roles.ADMIN:
             user.is_active = True
