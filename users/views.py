@@ -1,15 +1,17 @@
-from django.contrib.auth import authenticate, login
+from django.db import transaction
+from django.contrib.auth import authenticate, login, logout
 
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
 
 from .models import User
 from .serializers import (
     UserSerializer,
-    UserSignUpSerializer,
+    UserRegisterSerializer,
     UserSignInSerializer,
     UserSignInResponseSerializer,
 )
@@ -20,7 +22,7 @@ class UserListView(
     mixins.ListModelMixin,
 ):
 
-    queryset = User.objects.all()
+    queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserSerializer
 
     @swagger_auto_schema(operation_summary="유저 정보")
@@ -50,16 +52,33 @@ class UserSignInView(generics.GenericAPIView):
             )
 
         login(request, user)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class UserSignUpView(generics.GenericAPIView, mixins.CreateModelMixin):
+class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = User.objects.all()
-    serializer_class = UserSignUpSerializer
+    serializer_class = UserRegisterSerializer
 
-    @swagger_auto_schema(operation_summary="유저 생성")
+    @swagger_auto_schema(
+        operation_summary="유저 생성",
+        responses={status.HTTP_201_CREATED: UserRegisterSerializer},
+    )
+    @transaction.atomic
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(status=200)
+
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+
+class UserLogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="로그아웃",
+        responses={status.HTTP_200_OK: "User logged out"},
+    )
+    def get(self, request):
+        logout(request)
+        return Response(data="User logged out", status=status.HTTP_200_OK)
