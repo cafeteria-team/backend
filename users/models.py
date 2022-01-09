@@ -7,9 +7,11 @@ from django.utils.translation import gettext_lazy as _
 class User(AbstractUser):
     """Custom User Model"""
 
-    # class UserRoles(models.TextChoices):
-    #     ADMIN = "ADMIN", _("Admin")
+    class UserRoles(models.TextChoices):
+        ADMIN = "ADMIN", _("Admin")
+        STORE = "STORE", _("Store")
 
     phone = models.CharField(max_length=11)
-    is_active = models.BooleanField(default=False)
-    # role = models.CharField(max_length=20, choices=UserRoles.choices)
+    role = models.CharField(
+        max_length=20, choices=UserRoles.choices, default=UserRoles.STORE
+    )
