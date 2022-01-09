@@ -11,15 +11,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = [
-            "id",
-            "last_login",
-            "username",
-            "email",
-            "date_joined",
-            "phone",
-            "store",
-        ]
+        fields = "__all__"
 
 
 class UserSignInSerializer(serializers.Serializer):
@@ -45,14 +37,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.username = validated_data["username"]
         user.set_password(validated_data["password"])
         user.email = validated_data["email"]
+        user.phone = validated_data["phone"]
         user.save()
-
-        store = Store()
-        store.user_id = user.id
-        store.addr = validated_data["store"]["addr"]
-        store.zip_code = validated_data["store"]["zip_code"]
-        store.detail_addr = validated_data["store"]["detail_addr"]
-        store.busi_num = validated_data["store"]["busi_num"]
-        store.save()
 
         return validated_data

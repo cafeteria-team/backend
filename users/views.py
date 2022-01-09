@@ -22,7 +22,7 @@ class UserListView(
     mixins.ListModelMixin,
 ):
 
-    queryset = User.objects.all()
+    queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserSerializer
 
     @swagger_auto_schema(operation_summary="유저 정보")
@@ -69,7 +69,7 @@ class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(data=serializer.data, status=status.HTTP_201_OK)
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
 
 class UserLogoutView(generics.GenericAPIView):
