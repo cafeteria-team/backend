@@ -7,8 +7,10 @@ class StoreSerializer(serializers.ModelSerializer):
         model = Store
 
         fields = [
+            "name",
             "addr",
             "zip_code",
             "detail_addr",
             "busi_num",
+            "busi_num_img",
         ]
