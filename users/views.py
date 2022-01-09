@@ -1,12 +1,12 @@
-from django.contrib.auth import authenticate, login
 from django.db import transaction
+from django.contrib.auth import authenticate, login, logout
 
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
-
 
 from .models import User
 from .serializers import (
@@ -70,3 +70,15 @@ class UserSignUpView(generics.GenericAPIView, mixins.CreateModelMixin):
         serializer.save()
 
         return Response(data=serializer.data, status=status.HTTP_201_OK)
+
+
+class UserLogoutView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="로그아웃",
+        responses={status.HTTP_200_OK: "User logged out"},
+    )
+    def get(self, request):
+        logout(request)
+        return Response(data="User logged out", status=status.HTTP_200_OK)
