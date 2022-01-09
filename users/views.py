@@ -11,7 +11,7 @@ from drf_yasg.utils import swagger_auto_schema
 from .models import User
 from .serializers import (
     UserSerializer,
-    UserSignUpSerializer,
+    UserRegisterSerializer,
     UserSignInSerializer,
     UserSignInResponseSerializer,
 )
@@ -55,13 +55,13 @@ class UserSignInView(generics.GenericAPIView):
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
-class UserSignUpView(generics.GenericAPIView, mixins.CreateModelMixin):
+class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = User.objects.all()
-    serializer_class = UserSignUpSerializer
+    serializer_class = UserRegisterSerializer
 
     @swagger_auto_schema(
         operation_summary="유저 생성",
-        responses={status.HTTP_201_CREATED: UserSignUpSerializer},
+        responses={status.HTTP_201_CREATED: UserRegisterSerializer},
     )
     @transaction.atomic
     def post(self, request):

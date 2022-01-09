@@ -33,7 +33,7 @@ class UserSignInResponseSerializer(serializers.ModelSerializer):
         fields = ["username"]
 
 
-class UserSignUpSerializer(serializers.ModelSerializer):
+class UserRegisterSerializer(serializers.ModelSerializer):
     store = StoreSerializer()
 
     class Meta:
