@@ -12,6 +12,7 @@ from .models import User
 from .serializers import (
     UserSerializer,
     UserRegisterSerializer,
+    UserRegisterResponseSerializer,
     UserSignInSerializer,
     UserSignInResponseSerializer,
 )
@@ -61,7 +62,7 @@ class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
 
     @swagger_auto_schema(
         operation_summary="유저 생성",
-        responses={status.HTTP_201_CREATED: UserRegisterSerializer},
+        responses={status.HTTP_201_CREATED: UserRegisterResponseSerializer},
     )
     @transaction.atomic
     def post(self, request):
@@ -69,7 +70,8 @@ class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        data = {"username": serializer.data["username"]}
+        return Response(data=data, status=status.HTTP_201_CREATED)
 
 
 class UserLogoutView(generics.GenericAPIView):
