@@ -8,6 +8,8 @@ from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
 
+from core.permissions.permissions import AdminPermission
+
 from .models import User
 from .serializers import (
     UserSerializer,
@@ -25,6 +27,7 @@ class UserListView(
 
     queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, AdminPermission]
 
     @swagger_auto_schema(operation_summary="유저 정보")
     def get(self, request, *args, **kwargs):
