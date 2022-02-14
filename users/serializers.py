@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 
 from .models import User
@@ -34,6 +35,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         max_length=10, source="store.busi_num", required=False
     )
     busi_num_img = serializers.CharField(max_length=256, source="store.busi_num_img")
+    confirm_password = serializers.CharField(max_length=128)
 
     class Meta:
         model = User
@@ -41,6 +43,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "id",
             "username",
             "password",
+            "confirm_password",
             "email",
             "phone",
             "role",
@@ -51,6 +54,16 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "busi_num",
             "busi_num_img",
         ]
+
+    def validate(self, attrs):
+        password = attrs["password"]
+        confirm_password = attrs["confirm_password"]
+        if password != confirm_password:
+            raise ValidationError(
+                "Password is not matching. Please checkout password and confirm_password filed!"
+            )
+
+        return super().validate(attrs)
 
     def create(self, validated_data):
         user = User()
