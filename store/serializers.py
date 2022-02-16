@@ -14,3 +14,10 @@ class StoreSerializer(serializers.ModelSerializer):
             "busi_num",
             "busi_num_img",
         ]
+
+
+class MemberStoreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+
+        fields = ["name"]
