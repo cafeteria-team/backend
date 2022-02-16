@@ -9,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 
 from core.permissions.permissions import AdminPermission
+from core.pagination.pagination import CustomPagination
 
 from .models import User
 from .serializers import (
@@ -28,6 +29,7 @@ class UserListView(
     queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, AdminPermission]
+    pagination_class = CustomPagination
 
     @swagger_auto_schema(operation_summary="유저 정보")
     def get(self, request, *args, **kwargs):
@@ -81,9 +83,26 @@ class UserLogoutView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     @swagger_auto_schema(
-        operation_summary="로그아웃",
+        operation_summary="로그 아웃",
         responses={status.HTTP_200_OK: "User logged out"},
     )
     def get(self, request):
         logout(request)
         return Response(data="User logged out", status=status.HTTP_200_OK)
+
+
+class UserDeleteView(generics.GenericAPIView, mixins.DestroyModelMixin):
+    """
+    사용자 삭제
+
+     - id = 사용자 ID
+    """
+
+    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        responses={status.HTTP_200_OK: "User deleted"},
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
