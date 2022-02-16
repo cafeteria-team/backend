@@ -64,12 +64,12 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         zip_code = attrs["store"]["zip_code"]
 
         if password != confirm_password:
-            msg = {"password": "패스워드가 동일하지 않습니다. 다시 확인해주세요."}
+            msg = "패스워드가 동일하지 않습니다. 다시 확인해주세요."
             raise ValidationError(msg)
 
         try:
             User.objects.get(email=email)
-            msg = {"email": "해당 이메일은 이미 가입되어있습니다. 확인 후 다시 시도해주세요."}
+            msg = "해당 이메일은 이미 가입되어있습니다. 확인 후 다시 시도해주세요."
             raise DuplicationException(msg)
         except User.DoesNotExist:
             pass
@@ -79,18 +79,18 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         try:
             busi_num = int(busi_num)
         except:
-            msg = {"busi_num": "사업자 번호는 숫자만 사용할 수 있습니다."}
+            msg = "사업자 번호는 숫자만 사용할 수 있습니다."
             raise ValidationError(msg)
 
         if store.exists():
             store = store.first()
-            msg = {"busi_num": "사업자 번호가 이미 존재합니다. 확인 후 다시 시도해주세요."}
+            msg = "사업자 번호가 이미 존재합니다. 확인 후 다시 시도해주세요."
             raise DuplicationException(msg)
 
         try:
             zip_code = int(zip_code)
         except:
-            msg = {"zip_code": "우편번호는 숫자만 사용할 수 있습니다."}
+            msg = "우편번호는 숫자만 사용할 수 있습니다."
             raise ValidationError(msg)
 
         return super().validate(attrs)
