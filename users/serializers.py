@@ -3,17 +3,26 @@ from rest_framework.exceptions import ValidationError
 
 from .models import User
 from store.models import Store
-from store.serializers import StoreSerializer
+from store.serializers import MemberStoreSerializer
 
 from core.exceptions.exceptions import DuplicationException
 
 
 class UserSerializer(serializers.ModelSerializer):
-    store = StoreSerializer()
+    store = MemberStoreSerializer()
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "phone", "role", "store"]
+        fields = [
+            "id",
+            "username",
+            "email",
+            "phone",
+            "role",
+            "store",
+            "date_joined",
+            "is_active",
+        ]
 
 
 class UserSignInSerializer(serializers.Serializer):
