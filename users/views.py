@@ -73,7 +73,7 @@ class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        data = {"username": serializer.data["username"]}
+        data = {"msg": "회원가입에 성공하였습니다."}
         return Response(data=data, status=status.HTTP_201_CREATED)
 
 
