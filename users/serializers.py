@@ -1,10 +1,11 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-
 from .models import User
 from store.models import Store
 from store.serializers import StoreSerializer
+
+from core.exceptions.exceptions import DuplicationException
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -58,10 +59,39 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         password = attrs["password"]
         confirm_password = attrs["confirm_password"]
+        email = attrs["email"]
+        busi_num = attrs["store"]["busi_num"]
+        zip_code = attrs["store"]["zip_code"]
+
         if password != confirm_password:
-            raise ValidationError(
-                "Password is not matching. Please checkout password and confirm_password filed!"
-            )
+            msg = {"password": "패스워드가 동일하지 않습니다. 다시 확인해주세요."}
+            raise ValidationError(msg)
+
+        try:
+            User.objects.get(email=email)
+            msg = {"email": "해당 이메일은 이미 가입되어있습니다. 확인 후 다시 시도해주세요."}
+            raise DuplicationException(msg)
+        except User.DoesNotExist:
+            pass
+
+        store = Store.objects.filter(busi_num=busi_num)
+
+        try:
+            busi_num = int(busi_num)
+        except:
+            msg = {"busi_num": "사업자 번호는 숫자만 사용할 수 있습니다."}
+            raise ValidationError(msg)
+
+        if store.exists():
+            store = store.first()
+            msg = {"busi_num": "사업자 번호가 이미 존재합니다. 확인 후 다시 시도해주세요."}
+            raise DuplicationException(msg)
+
+        try:
+            zip_code = int(zip_code)
+        except:
+            msg = {"zip_code": "우편번호는 숫자만 사용할 수 있습니다."}
+            raise ValidationError(msg)
 
         return super().validate(attrs)
 
