@@ -18,6 +18,8 @@ from .serializers import (
     UserRegisterResponseSerializer,
     UserSignInSerializer,
     UserSignInResponseSerializer,
+    UserDetailSerializer,
+    UserDetailUpdateSerializer,
 )
 
 
@@ -28,10 +30,10 @@ class UserListView(
 
     queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, AdminPermission]
+    permission_classes = [IsAuthenticated]
     pagination_class = CustomPagination
 
-    @swagger_auto_schema(operation_summary="유저 정보")
+    @swagger_auto_schema(operation_summary="유저 리스트")
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
@@ -91,18 +93,51 @@ class UserLogoutView(generics.GenericAPIView):
         return Response(data="User logged out", status=status.HTTP_200_OK)
 
 
-class UserDeleteView(generics.GenericAPIView, mixins.DestroyModelMixin):
-    """
-    사용자 삭제
-
-     - id = 사용자 ID
-    """
+class UserDetailView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+):
 
     queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
+    serializer_class = UserDetailSerializer
+
+    def get_object(self, pk):
+        try:
+            user = User.objects.get(pk=pk)
+            return user
+        except User.DoesNotExist:
+            raise NotFound("유저 정보를 찾을 수 없습니다. 확인 후 다시 시도해주세요.")
 
     @swagger_auto_schema(
-        responses={status.HTTP_200_OK: "User deleted"},
+        operation_summary="사용자 정보",
+        responses={status.HTTP_200_OK: UserDetailSerializer()},
     )
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_summary="사용자 정보 수정",
+        request_body=UserDetailUpdateSerializer(),
+        responses={status.HTTP_200_OK: "사용자 정보 수정 완료"},
+    )
+    @transaction.atomic
+    def patch(self, request, pk):
+        user = self.get_object(pk)
+        serializer = UserDetailUpdateSerializer(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        msg = {"msg": "사용자 정보가 수정되었습니다."}
+        return Response(msg)
+
+    @swagger_auto_schema(
+        operation_summary="사용자 삭제",
+        responses={status.HTTP_200_OK: "사용자 정보가 삭제되었습니다."},
+    )
+    @transaction.atomic
+    def delete(self, request, pk):
+        user = self.get_object(pk)
+        user.delete()
+        msg = {"msg": "사용자 정보가 삭제되었습니다."}
+        return Response(msg)
