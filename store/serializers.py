@@ -19,5 +19,10 @@ class StoreSerializer(serializers.ModelSerializer):
 class MemberStoreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Store
-
         fields = ["name"]
+
+
+class MemberDetailStoreSerialzer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = ["name", "busi_num"]
