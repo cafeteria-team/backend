@@ -7,3 +7,10 @@ class DuplicationException(APIException):
 
     def __init__(self, detail=None):
         super().__init__(detail=detail)
+
+
+class ValidateException(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+
+    def __init__(self, detail=None):
+        super().__init__(detail=detail)
