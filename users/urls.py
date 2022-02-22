@@ -4,7 +4,7 @@ from .views import (
     UserSignInView,
     UserLogoutView,
     UserRegisterView,
-    UserDeleteView,
+    UserDetailView,
 )
 
 
@@ -13,5 +13,5 @@ urlpatterns = [
     path("user/login", UserSignInView.as_view()),
     path("user/register", UserRegisterView.as_view()),
     path("user/logout", UserLogoutView.as_view()),
-    path("user/<int:pk>", UserDeleteView.as_view()),
+    path("user/<int:pk>", UserDetailView.as_view()),
 ]
