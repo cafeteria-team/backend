@@ -14,3 +14,10 @@ class ValidateException(APIException):
 
     def __init__(self, detail=None):
         super().__init__(detail=detail)
+
+
+class NotFoundException(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+
+    def __init__(self, detail=None):
+        super().__init__(detail=detail)
