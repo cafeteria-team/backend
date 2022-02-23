@@ -4,12 +4,13 @@ from django.contrib.auth import authenticate, login, logout
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from drf_yasg.utils import swagger_auto_schema
 
 from core.permissions.permissions import AdminPermission
 from core.pagination.pagination import CustomPagination
+from core.exceptions.exceptions import NotFoundException
 
 from .models import User
 from .serializers import (
@@ -40,6 +41,7 @@ class UserListView(
 
 class UserSignInView(generics.GenericAPIView):
     serializer_class = UserSignInSerializer
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         operation_summary="로그인",
@@ -52,15 +54,19 @@ class UserSignInView(generics.GenericAPIView):
         username = request.data["username"]
         password = request.data["password"]
 
-        user = authenticate(request, username=username, password=password)
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFoundException("사용자 정보를 찾을 수 없습니다.")
 
-        if user == None:
-            raise NotFound(
-                "Authentication failed.\nPlease check your username or password data"
-            )
+        if user.is_active:
+            user_info = authenticate(request, username=username, password=password)
+            login(request, user_info)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
 
-        login(request, user)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            data = {"msg": "사용자 계정이 활성화 되지 않았습니다. 관리자에게 문의하세요."}
+            return Response(data=data, status=status.HTTP_200_OK)
 
 
 class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
