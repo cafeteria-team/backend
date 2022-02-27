@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -35,6 +36,7 @@ THIRD_PARTY_APPS = [
     "rest_framework",
     "drf_yasg",
     "corsheaders",
+    "rest_framework_simplejwt",
 ]
 
 PROJECT_APPS = ["users", "store"]
@@ -125,8 +127,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
-        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
     "EXCEPTION_HANDLER": "config.utils.custom_exception_handler",
 }
@@ -159,5 +160,29 @@ CORS_ORIGIN_ALLOW_ALL = True
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
+# For HTTPS
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+
+# Simple JWT 설정
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),  # Access token 60분
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh token 7일
+    "ROTATE_REFRESH_TOKENS": True,  # Refresh 및 Access 토큰 발급
+    "ALGORITHM": "HS256",
+    "SIGNING_KEY": "good-cafeteria",
+    "AUTH_HEADER_TYPES": ("Bearer"),
+}
+
+# Swagger 페이지 내 Authorize 변경
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "api_key": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "Authorization",
+            "description": "Bearer authorization",
+        }
+    },
+}
