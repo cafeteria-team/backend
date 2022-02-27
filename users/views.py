@@ -1,10 +1,11 @@
 from django.db import transaction
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout
 
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -21,6 +22,7 @@ from .serializers import (
     UserSignInResponseSerializer,
     UserDetailSerializer,
     UserDetailUpdateSerializer,
+    CustomTokenRefreshSerializer,
 )
 
 
@@ -39,20 +41,17 @@ class UserListView(
         return self.list(request, *args, **kwargs)
 
 
-class UserSignInView(generics.GenericAPIView):
+class UserSignInView(TokenObtainPairView):
+
     serializer_class = UserSignInSerializer
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
-        operation_summary="로그인",
+        operation_summary="로그인(토큰 발급)",
         responses={status.HTTP_200_OK: UserSignInResponseSerializer},
     )
-    def post(self, request):
-        serializer = UserSignInSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
+    def post(self, request, *args, **kwargs):
         username = request.data["username"]
-        password = request.data["password"]
 
         try:
             user = User.objects.get(username=username)
@@ -60,18 +59,28 @@ class UserSignInView(generics.GenericAPIView):
             raise NotFoundException("사용자 정보를 찾을 수 없습니다.")
 
         if user.is_active:
-            user_info = authenticate(request, username=username, password=password)
-            login(request, user_info)
-            return Response(data=serializer.data, status=status.HTTP_200_OK)
+            return super().post(request, *args, **kwargs)
 
         else:
             data = {"msg": "사용자 계정이 활성화 되지 않았습니다. 관리자에게 문의하세요."}
             return Response(data=data, status=status.HTTP_200_OK)
 
 
+class CustomUserRefreshTokenView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_summary="토큰 갱신",
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
+
+
 class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         operation_summary="유저 생성",
