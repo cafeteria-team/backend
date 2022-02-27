@@ -101,17 +101,15 @@ class UserLogoutView(generics.GenericAPIView):
 
 class UserDetailView(
     generics.GenericAPIView,
-    mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
 ):
 
-    queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = UserDetailSerializer
 
-    def get_object(self, pk):
+    def get_queryset(self, pk):
         try:
-            user = User.objects.get(pk=pk)
+            user = User.objects.get(id=pk)
             return user
         except User.DoesNotExist:
             raise NotFound("유저 정보를 찾을 수 없습니다. 확인 후 다시 시도해주세요.")
@@ -120,8 +118,10 @@ class UserDetailView(
         operation_summary="사용자 정보",
         responses={status.HTTP_200_OK: UserDetailSerializer()},
     )
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def get(self, request, pk):
+        queryset = self.get_queryset(pk=pk)
+        serializer = self.get_serializer(queryset)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="사용자 정보 수정",
@@ -130,7 +130,7 @@ class UserDetailView(
     )
     @transaction.atomic
     def patch(self, request, pk):
-        user = self.get_object(pk)
+        user = self.get_queryset(pk=pk)
         serializer = UserDetailUpdateSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -143,7 +143,7 @@ class UserDetailView(
     )
     @transaction.atomic
     def delete(self, request, pk):
-        user = self.get_object(pk)
+        user = self.get_queryset(pk)
         user.delete()
         msg = {"msg": "사용자 정보가 삭제되었습니다."}
         return Response(msg)
