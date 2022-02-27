@@ -1,5 +1,9 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+from rest_framework_simplejwt.serializers import (
+    TokenObtainPairSerializer,
+    TokenRefreshSerializer,
+)
 
 from store.models import Store
 from store.serializers import MemberStoreSerializer, MemberDetailStoreSerialzer
@@ -27,9 +31,12 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserSignInSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+class UserSignInSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        token["user_id"] = user.id
+        return token
 
 
 class UserSignInResponseSerializer(serializers.ModelSerializer):
@@ -171,3 +178,8 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
         instance.store.busi_num = validated_data["store"]["busi_num"]
         instance.save()
         return instance
+
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        return super().validate(attrs)
