@@ -25,30 +25,34 @@ from .serializers import (
     CustomTokenRefreshSerializer,
 )
 
+# generics.ListAPIView: 쿼리셋을 리스트 형태로 나열하기 위한 함수 (GET)
+#
+
 
 class UserListView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
+    generics.ListAPIView,
 ):
+    """
+    유저 리스트
+
+
+    page = 페이지 숫자
+    page_size = 페이지 내 표현해야할 사이즈
+    """
 
     queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, AdminPermission]
     pagination_class = CustomPagination
 
-    @swagger_auto_schema(operation_summary="유저 리스트")
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
 
-
-class UserSignInView(TokenObtainPairView):
+class UserLoginView(TokenObtainPairView):
 
     serializer_class = UserSignInSerializer
     permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         operation_summary="로그인(토큰 발급)",
-        responses={status.HTTP_200_OK: UserSignInResponseSerializer},
     )
     def post(self, request, *args, **kwargs):
         username = request.data["username"]
