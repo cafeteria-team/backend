@@ -10,8 +10,65 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
+import json
 from datetime import timedelta
 from pathlib import Path
+
+# For aws
+import base64
+import boto3
+from botocore.exceptions import ClientError
+
+
+def get_secret():
+    secret_name = "arn:aws:secretsmanager:ap-northeast-2:469239856738:secret:config/settings/secret_key-X2r4Ve"
+    region_name = "ap-northeast-2"
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(service_name="secretsmanager", region_name=region_name)
+    # In this sample we only handle the specific exceptions for the 'GetSecretValue' API.
+    # See https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+    # We rethrow the exception by default.
+
+    try:
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+    except ClientError as e:
+        if e.response["Error"]["Code"] == "DecryptionFailureException":
+            # Secrets Manager can't decrypt the protected secret text using the provided KMS key.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response["Error"]["Code"] == "InternalServiceErrorException":
+            # An error occurred on the server side.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response["Error"]["Code"] == "InvalidParameterException":
+            # You provided an invalid value for a parameter.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response["Error"]["Code"] == "InvalidRequestException":
+            # You provided a parameter value that is not valid for the current state of the resource.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+        elif e.response["Error"]["Code"] == "ResourceNotFoundException":
+            # We can't find the resource that you asked for.
+            # Deal with the exception here, and/or rethrow at your discretion.
+            raise e
+    else:
+        # Decrypts secret using the associated KMS key.
+        # Depending on whether the secret is a string or binary, one of these fields will be populated.
+        if "SecretString" in get_secret_value_response:
+            secret = get_secret_value_response["SecretString"]
+        else:
+            decoded_binary_secret = base64.b64decode(
+                get_secret_value_response["SecretBinary"]
+            )
+
+    return json.loads(secret)
+
+
+SECRET = get_secret()
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +78,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-obss1b%i(9*7(qtqxx$9u$gio#kb3u54xe%wvr_1j9m47t*toi"
+SECRET_KEY = SECRET["secret_key"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -156,7 +213,7 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.User"
-CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True  # Cors
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
@@ -170,15 +227,15 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),  # Access token 60분
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh token 7일
     "ROTATE_REFRESH_TOKENS": True,  # Refresh 및 Access 토큰 발급
-    "ALGORITHM": "HS256",
-    "SIGNING_KEY": "good-cafeteria",
-    "AUTH_HEADER_TYPES": ("Bearer"),
+    "ALGORITHM": "HS256",  # 알고리즘
+    "SIGNING_KEY": SECRET["jwt_key"],  # Key 값
+    "AUTH_HEADER_TYPES": ("Bearer"),  # 인증 방식 Bearer
 }
 
 # Swagger 페이지 내 Authorize 변경
 SWAGGER_SETTINGS = {
     "SECURITY_DEFINITIONS": {
-        "api_key": {
+        "Bearer": {
             "type": "apiKey",
             "in": "header",
             "name": "Authorization",
