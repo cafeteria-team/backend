@@ -227,7 +227,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),  # Access token 60분
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh token 7일
     "ROTATE_REFRESH_TOKENS": True,  # Refresh 및 Access 토큰 발급
-    "ALGORITHM": "HS256",  # 알고리즘
+    "ALGORITHM": "HS256",  # 암호화 알고리즘
     "SIGNING_KEY": SECRET["jwt_key"],  # Key 값
     "AUTH_HEADER_TYPES": ("Bearer"),  # 인증 방식 Bearer
 }
