@@ -4,7 +4,7 @@ from users.models import User
 
 
 class AdminPermission(BasePermission):
-    message = "You can not acccess your permission"
+    message = "Permission deniend!"
 
     def has_permission(self, request, view):
         user_roles = User.UserRoles

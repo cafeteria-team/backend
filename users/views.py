@@ -1,15 +1,17 @@
 from django.db import transaction
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import logout
 
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from drf_yasg.utils import swagger_auto_schema
 
 from core.permissions.permissions import AdminPermission
 from core.pagination.pagination import CustomPagination
+from core.exceptions.exceptions import NotFoundException
 
 from .models import User
 from .serializers import (
@@ -20,52 +22,69 @@ from .serializers import (
     UserSignInResponseSerializer,
     UserDetailSerializer,
     UserDetailUpdateSerializer,
+    CustomTokenRefreshSerializer,
 )
+
+# generics.ListAPIView: 쿼리셋을 리스트 형태로 나열하기 위한 함수 (GET)
+#
 
 
 class UserListView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
+    generics.ListAPIView,
 ):
+    """
+    유저 리스트
+
+
+    page = 페이지 숫자
+    page_size = 페이지 내 표현해야할 사이즈
+    """
 
     queryset = User.objects.exclude(is_superuser=True)
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, AdminPermission]
     pagination_class = CustomPagination
 
-    @swagger_auto_schema(operation_summary="유저 리스트")
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
 
+class UserLoginView(TokenObtainPairView):
 
-class UserSignInView(generics.GenericAPIView):
     serializer_class = UserSignInSerializer
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
-        operation_summary="로그인",
-        responses={status.HTTP_200_OK: UserSignInResponseSerializer},
+        operation_summary="로그인(토큰 발급)",
     )
-    def post(self, request):
-        serializer = UserSignInSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
+    def post(self, request, *args, **kwargs):
         username = request.data["username"]
-        password = request.data["password"]
 
-        user = authenticate(request, username=username, password=password)
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFoundException("사용자 정보를 찾을 수 없습니다.")
 
-        if user == None:
-            raise NotFound(
-                "Authentication failed.\nPlease check your username or password data"
-            )
+        if user.is_active:
+            return super().post(request, *args, **kwargs)
 
-        login(request, user)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            data = {"msg": "사용자 계정이 활성화 되지 않았습니다. 관리자에게 문의하세요."}
+            return Response(data=data, status=status.HTTP_200_OK)
+
+
+class CustomUserRefreshTokenView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
+    permission_classes = [AllowAny]
+
+    @swagger_auto_schema(
+        operation_summary="토큰 갱신",
+    )
+    def post(self, request, *args, **kwargs):
+        return super().post(request, *args, **kwargs)
 
 
 class UserRegisterView(generics.GenericAPIView, mixins.CreateModelMixin):
     queryset = User.objects.all()
     serializer_class = UserRegisterSerializer
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
         operation_summary="유저 생성",
@@ -95,17 +114,15 @@ class UserLogoutView(generics.GenericAPIView):
 
 class UserDetailView(
     generics.GenericAPIView,
-    mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
 ):
 
-    queryset = User.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = UserDetailSerializer
 
-    def get_object(self, pk):
+    def get_queryset(self, pk):
         try:
-            user = User.objects.get(pk=pk)
+            user = User.objects.get(id=pk)
             return user
         except User.DoesNotExist:
             raise NotFound("유저 정보를 찾을 수 없습니다. 확인 후 다시 시도해주세요.")
@@ -114,8 +131,10 @@ class UserDetailView(
         operation_summary="사용자 정보",
         responses={status.HTTP_200_OK: UserDetailSerializer()},
     )
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+    def get(self, request, pk):
+        queryset = self.get_queryset(pk=pk)
+        serializer = self.get_serializer(queryset)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_summary="사용자 정보 수정",
@@ -124,7 +143,7 @@ class UserDetailView(
     )
     @transaction.atomic
     def patch(self, request, pk):
-        user = self.get_object(pk)
+        user = self.get_queryset(pk=pk)
         serializer = UserDetailUpdateSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -137,7 +156,7 @@ class UserDetailView(
     )
     @transaction.atomic
     def delete(self, request, pk):
-        user = self.get_object(pk)
+        user = self.get_queryset(pk)
         user.delete()
         msg = {"msg": "사용자 정보가 삭제되었습니다."}
         return Response(msg)
