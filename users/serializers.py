@@ -121,6 +121,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.email = validated_data["email"]
         user.phone = validated_data["phone"]
+        user.role = validated_data["role"]
 
         if validated_data["role"] == user_roles.ADMIN:
             user.is_active = True
