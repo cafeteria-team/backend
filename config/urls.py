@@ -11,6 +11,7 @@ from drf_yasg.views import get_schema_view
 """Swagger Setting"""
 schema_url_patterns = [
     path("api/", include("users.urls")),
+    path("api/", include("phone.urls")),
 ]
 
 schema_view_v1 = get_schema_view(
@@ -47,4 +48,5 @@ swagger_urlpatterns = [
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("users.urls")),
+    path("api/", include("phone.urls")),
 ] + swagger_urlpatterns
