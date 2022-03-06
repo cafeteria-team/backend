@@ -96,7 +96,11 @@ THIRD_PARTY_APPS = [
     "rest_framework_simplejwt",
 ]
 
-PROJECT_APPS = ["users", "store"]
+PROJECT_APPS = [
+    "users",
+    "store",
+    "phone",
+]
 
 DJANGO_APPS = [
     "django.contrib.admin",
@@ -243,3 +247,6 @@ SWAGGER_SETTINGS = {
         }
     },
 }
+
+
+# Naver Cloud SMS URL
