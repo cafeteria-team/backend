@@ -1,6 +1,6 @@
 from django.contrib import admin
-from .models import AuthLog
+from .models import PhoneAuthLog
 
 # Register your models here.
 
-admin.site.register(AuthLog)
+admin.site.register(PhoneAuthLog)
