@@ -89,17 +89,19 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 THIRD_PARTY_APPS = [
-    "django",
-    "rest_framework",
-    "drf_yasg",
     "corsheaders",
+    "django",
+    "django_filters",
+    "drf_yasg",
+    "requests",
+    "rest_framework",
     "rest_framework_simplejwt",
 ]
 
 PROJECT_APPS = [
-    "users",
-    "store",
     "phone",
+    "store",
+    "users",
 ]
 
 DJANGO_APPS = [
@@ -190,6 +192,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "EXCEPTION_HANDLER": "config.utils.custom_exception_handler",
 }
 
@@ -249,4 +252,9 @@ SWAGGER_SETTINGS = {
 }
 
 
-# Naver Cloud SMS URL
+# Naver Cloud 정보
+SMS_ACCESS_KEY = SECRET["sms_access_key"]
+SMS_SECRET_KEY = SECRET["sms_secret_key"]
+SMS_SERVICE_ID = SECRET["sms_service_id"]
+SMS_URL = "https://sens.apigw.ntruss.com"
+CUSTOMER_SERIVCE_NUMBER = "01041778514"
