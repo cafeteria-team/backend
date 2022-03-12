@@ -60,7 +60,8 @@ class SmsAuth(generics.GenericAPIView):
 
         if queryset.exists():
             recent_auth_phone = queryset.last()
-            if recent_auth_phone.auth_num == int(auth_num):
+
+            if recent_auth_phone.auth_num == auth_num:
                 return Response("인증 완료")
             else:
                 raise ValidateException("인증번호가 다릅니다. 확인 후 다시 시도해주세요.")
