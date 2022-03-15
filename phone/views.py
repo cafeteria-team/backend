@@ -86,4 +86,4 @@ class SmsAuth(generics.GenericAPIView):
         phone_manager = PhoneManager()
         phone_manager.send_sms(phone_num)
 
-        return Response("success")
+        return Response("인증번호 발송 완료")
