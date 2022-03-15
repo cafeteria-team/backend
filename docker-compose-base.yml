@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  db:
+    image: postgres
+    container_name: db_server
+    environment:
+      - POSTGRES_USER=backend
+      - POSTGRES_PASSWORD=backend
+    ports:
+      - "5432:5432"
+    volumes:
+      - ~/Dev/backend_db:/var/lib/postgresql/data/
+
+  api_server:
+    image: tpdnrzz/good-cafeteria
+    command: python manage.py runserver 0.0.0.0:8000 --settings=config.settings.base
+    container_name: api_server
+    depends_on:
+      - db
+    ports:
+      - "8000:8000"
+    volumes:
+      - ~/.aws/:/root/.aws:ro #Ro: Read only option
