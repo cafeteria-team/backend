@@ -154,7 +154,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "backend",
+        "NAME": "good_cafeteria",
         "USER": "backend",
         "PASSWORD": "backend",
         "HOST": "localhost",
