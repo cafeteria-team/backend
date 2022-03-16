@@ -15,3 +15,4 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=20, choices=UserRoles.choices, default=UserRoles.STORE
     )
+    deleted = models.BooleanField(default=False)
