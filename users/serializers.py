@@ -181,12 +181,6 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
-class UserSecessionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ["deleted"]
-
-
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         return super().validate(attrs)

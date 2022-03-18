@@ -21,7 +21,6 @@ from .serializers import (
     UserRegisterSerializer,
     UserRegisterResponseSerializer,
     UserSignInSerializer,
-    UserSecessionSerializer,
     UserDetailSerializer,
     UserDetailUpdateSerializer,
     CustomTokenRefreshSerializer,
@@ -119,7 +118,7 @@ class UserDetailView(
     mixins.UpdateModelMixin,
 ):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     serializer_class = UserDetailSerializer
 
     def get_queryset(self, pk):
@@ -159,20 +158,7 @@ class UserDetailView(
     @transaction.atomic
     def delete(self, request, pk):
         user = self.get_queryset(pk)
-        user.delete()
+        user.deleted = True
+        user.save()
         msg = {"msg": "사용자 정보가 삭제되었습니다."}
-        return Response(msg)
-
-
-class UserSecession(generics.GenericAPIView, mixins.UpdateModelMixin):
-    queryset = User.objects.all()
-    serializer_class = UserSecessionSerializer
-    permission_classes = [IsAuthenticated, AdminPermission]
-
-    @swagger_auto_schema(
-        operation_summary="회원 탈퇴", responses={200: "해당 업체가 회원탈퇴처리 되었습니다."}
-    )
-    def patch(self, request, *args, **kwargs):
-        self.partial_update(request, *args, **kwargs)
-        msg = {"msg": "해당 업체가 회원탈퇴처리 되었습니다."}
         return Response(msg)
