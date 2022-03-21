@@ -25,4 +25,4 @@ class MemberStoreSerializer(serializers.ModelSerializer):
 class MemberDetailStoreSerialzer(serializers.ModelSerializer):
     class Meta:
         model = Store
-        fields = ["name", "busi_num"]
+        fields = ["name", "busi_num", "busi_num_img"]
