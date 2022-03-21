@@ -71,7 +71,7 @@ SECRET = get_secret()
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -89,14 +89,20 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 THIRD_PARTY_APPS = [
-    "django",
-    "rest_framework",
-    "drf_yasg",
     "corsheaders",
+    "django",
+    "django_filters",
+    "drf_yasg",
+    "requests",
+    "rest_framework",
     "rest_framework_simplejwt",
 ]
 
-PROJECT_APPS = ["users", "store"]
+PROJECT_APPS = [
+    "phone",
+    "store",
+    "users",
+]
 
 DJANGO_APPS = [
     "django.contrib.admin",
@@ -145,21 +151,14 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": "goodfeteria",
-#         "USER": "admin",
-#         "PASSWORD": "1q2w3e4r##",
-#         "HOST": "localhost",
-#         "PORT": "5432",
-#     }
-# }
-
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "mydatabase",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": SECRET["LOCAL_DB_NAME"],
+        "USER": SECRET["LOCAL_DB_USER"],
+        "PASSWORD": SECRET["LOCAL_DB_PASSWORD"],
+        "HOST": SECRET["LOCAL_DB_HOST"],
+        "PORT": "5432",
     }
 }
 
@@ -186,6 +185,7 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework_simplejwt.authentication.JWTAuthentication"
     ],
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
     "EXCEPTION_HANDLER": "config.utils.custom_exception_handler",
 }
 
@@ -243,3 +243,11 @@ SWAGGER_SETTINGS = {
         }
     },
 }
+
+
+# Naver Cloud 정보
+SMS_ACCESS_KEY = SECRET["sms_access_key"]
+SMS_SECRET_KEY = SECRET["sms_secret_key"]
+SMS_SERVICE_ID = SECRET["sms_service_id"]
+SMS_URL = "https://sens.apigw.ntruss.com"
+CUSTOMER_SERIVCE_NUMBER = "01041778514"

@@ -11,6 +11,7 @@ class Store(models.Model):
     detail_addr = models.CharField(max_length=128, blank=True)
     busi_num = models.CharField(max_length=10)
     busi_num_img = models.CharField(max_length=256)
+    price = models.JSONField(default=dict)
 
     class Meta:
         db_table = "store"

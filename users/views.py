@@ -1,5 +1,7 @@
 from django.db import transaction
+from django.db.models import Q
 from django.contrib.auth import logout
+
 
 from rest_framework import generics, mixins, status
 from rest_framework.response import Response
@@ -19,10 +21,10 @@ from .serializers import (
     UserRegisterSerializer,
     UserRegisterResponseSerializer,
     UserSignInSerializer,
-    UserSignInResponseSerializer,
     UserDetailSerializer,
     UserDetailUpdateSerializer,
     CustomTokenRefreshSerializer,
+    UserApproveSerializer,
 )
 
 # generics.ListAPIView: 쿼리셋을 리스트 형태로 나열하기 위한 함수 (GET)
@@ -40,7 +42,7 @@ class UserListView(
     page_size = 페이지 내 표현해야할 사이즈
     """
 
-    queryset = User.objects.exclude(is_superuser=True)
+    queryset = User.objects.exclude(Q(is_superuser=True) | Q(deleted=True))
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, AdminPermission]
     pagination_class = CustomPagination
@@ -157,6 +159,20 @@ class UserDetailView(
     @transaction.atomic
     def delete(self, request, pk):
         user = self.get_queryset(pk)
-        user.delete()
+        user.deleted = True
+        user.save()
         msg = {"msg": "사용자 정보가 삭제되었습니다."}
         return Response(msg)
+
+
+class UserApproveView(generics.GenericAPIView, mixins.UpdateModelMixin):
+    permission_classes = [AllowAny]
+    queryset = User.objects.all()
+    serializer_class = UserApproveSerializer
+
+    @swagger_auto_schema(
+        operation_summary="사용자 승인 요청",
+    )
+    @transaction.atomic
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)

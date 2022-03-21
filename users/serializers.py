@@ -145,6 +145,12 @@ class UserRegisterResponseSerializer(serializers.ModelSerializer):
         fields = ["username"]
 
 
+class UserApproveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["is_active"]
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
     store = MemberDetailStoreSerialzer()
 
@@ -158,10 +164,11 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "store"]
+        fields = ["email", "password", "store"]
 
     def update(self, instance, validated_data):
         user = User.objects.filter(email=validated_data["email"])
+
         if user.exists():
             msg = "해당 이메일은 이미 중복입니다. 확인 후 다시 시도해주세요"
             raise DuplicationException(msg)
@@ -177,6 +184,7 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
         instance.email = validated_data["email"]
         instance.store.name = validated_data["store"]["name"]
         instance.store.busi_num = validated_data["store"]["busi_num"]
+        instance.set_password(validated_data["password"])
         instance.save()
         return instance
 
