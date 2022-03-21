@@ -24,6 +24,7 @@ from .serializers import (
     UserDetailSerializer,
     UserDetailUpdateSerializer,
     CustomTokenRefreshSerializer,
+    UserApproveSerializer,
 )
 
 # generics.ListAPIView: 쿼리셋을 리스트 형태로 나열하기 위한 함수 (GET)
@@ -118,7 +119,7 @@ class UserDetailView(
     mixins.UpdateModelMixin,
 ):
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = UserDetailSerializer
 
     def get_queryset(self, pk):
@@ -162,3 +163,16 @@ class UserDetailView(
         user.save()
         msg = {"msg": "사용자 정보가 삭제되었습니다."}
         return Response(msg)
+
+
+class UserApproveView(generics.GenericAPIView, mixins.UpdateModelMixin):
+    permission_classes = [AllowAny]
+    queryset = User.objects.all()
+    serializer_class = UserApproveSerializer
+
+    @swagger_auto_schema(
+        operation_summary="사용자 승인 요청",
+    )
+    @transaction.atomic
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
