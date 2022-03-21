@@ -145,6 +145,12 @@ class UserRegisterResponseSerializer(serializers.ModelSerializer):
         fields = ["username"]
 
 
+class UserApproveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["is_active"]
+
+
 class UserDetailSerializer(serializers.ModelSerializer):
     store = MemberDetailStoreSerialzer()
 
