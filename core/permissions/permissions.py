@@ -1,5 +1,4 @@
 from rest_framework.permissions import BasePermission
-from rest_framework.response import Response
 from users.models import User
 
 
