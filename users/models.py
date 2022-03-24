@@ -16,3 +16,6 @@ class User(AbstractUser):
         max_length=20, choices=UserRoles.choices, default=UserRoles.STORE
     )
     deleted = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = "user"
