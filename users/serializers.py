@@ -170,8 +170,9 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
         user = User.objects.filter(email=validated_data["email"])
 
         if user.exists():
-            msg = "해당 이메일은 이미 중복입니다. 확인 후 다시 시도해주세요"
-            raise DuplicationException(msg)
+            if user.first().id != instance.id:
+                msg = "해당 이메일은 이미 중복입니다. 확인 후 다시 시도해주세요"
+                raise DuplicationException(msg)
 
         type_check_busi_num = UserMananger.type_check_busi_num(
             busi_num=validated_data["store"]["busi_num"]
