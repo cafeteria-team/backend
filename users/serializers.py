@@ -189,6 +189,17 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
         return instance
 
 
+class UserPasswordUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["password"]
+
+    def update(self, instance, validated_data):
+        instance.set_password(validated_data["password"])
+        instance.save()
+        return instance
+
+
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
         print(attrs)
