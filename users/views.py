@@ -13,7 +13,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from core.permissions.permissions import AdminPermission
 from core.pagination.pagination import CustomPagination
-from core.exceptions.exceptions import NotFoundException
+from core.exceptions.exceptions import NotFoundException, ValidateException
 
 from .models import User
 from .serializers import (
@@ -78,10 +78,10 @@ class UserLoginView(TokenObtainPairView):
 
 class CustomUserRefreshTokenView(TokenRefreshView):
     serializer_class = CustomTokenRefreshSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     @swagger_auto_schema(
-        operation_summary="토큰 갱신(*)",
+        operation_summary="토큰 갱신",
     )
     def post(self, request, *args, **kwargs):
         return super().post(request, *args, **kwargs)
@@ -149,7 +149,11 @@ class UserDetailView(
     )
     @transaction.atomic
     def patch(self, request, pk):
-        user = self.get_queryset(pk=pk)
+        try:
+            user = self.get_queryset(pk=pk)
+        except:
+            raise ValidateException("사용자 정보를 찾을 수 없습니다. 다시 시도해주세요.")
+
         serializer = UserDetailUpdateSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
