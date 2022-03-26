@@ -2,6 +2,7 @@ from django.db import transaction
 
 from rest_framework import generics, status
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -14,7 +15,7 @@ from .messages import FacilityMessages
 
 class FacilityView(generics.GenericAPIView):
     """
-    편의시설 및 서비스
+    편의시설 및 서비스(*)
 
 
     ---
@@ -22,6 +23,7 @@ class FacilityView(generics.GenericAPIView):
 
     queryset = Facility.objects.all()
     serializer_class = FacilityListSerializer
+    permission_class = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
         store_id = kwargs.get("store_id", None)
@@ -44,6 +46,7 @@ class FacilityRegisterView(generics.CreateAPIView):
 
     queryset = Facility.objects.all()
     serializer_class = FacilityRegisterSerializer
+    permission_class = [IsAuthenticated]
 
     @swagger_auto_schema(
         request_body=FacilityRegisterSerializer(many=True),
