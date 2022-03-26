@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Store
+from .models import Store, Facility
 
 
 class StoreSerializer(serializers.ModelSerializer):
@@ -14,6 +14,18 @@ class StoreSerializer(serializers.ModelSerializer):
             "busi_num",
             "busi_num_img",
         ]
+
+
+class FacilityListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Facility
+        exclude = ["created", "updated", "deleted"]
+
+
+class FacilityRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Facility
+        fields = ["store", "name"]
 
 
 class MemberStoreSerializer(serializers.ModelSerializer):

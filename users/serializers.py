@@ -164,7 +164,7 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "password", "store"]
+        fields = ["email", "store"]
 
     def update(self, instance, validated_data):
         user = User.objects.filter(email=validated_data["email"])
@@ -184,11 +184,13 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
         instance.email = validated_data["email"]
         instance.store.name = validated_data["store"]["name"]
         instance.store.busi_num = validated_data["store"]["busi_num"]
-        instance.set_password(validated_data["password"])
+        instance.store.busi_num_img = validated_data["store"]["busi_num_img"]
         instance.save()
         return instance
 
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
+        print(attrs)
+        print("here")
         return super().validate(attrs)

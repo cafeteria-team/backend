@@ -13,7 +13,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from core.permissions.permissions import AdminPermission
 from core.pagination.pagination import CustomPagination
-from core.exceptions.exceptions import NotFoundException
+from core.exceptions.exceptions import NotFoundException, ValidateException
 
 from .models import User
 from .serializers import (
@@ -35,14 +35,18 @@ class UserListView(
     generics.ListAPIView,
 ):
     """
-    유저 리스트
+    유저 리스트(*)
 
 
     page = 페이지 숫자
     page_size = 페이지 내 표현해야할 사이즈
+    -----
+    어드민 전용 API
     """
 
-    queryset = User.objects.exclude(Q(is_superuser=True) | Q(deleted=True))
+    queryset = User.objects.exclude(
+        Q(is_superuser=True) | Q(deleted=True) | Q(role=User.UserRoles.ADMIN)
+    )
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, AdminPermission]
     pagination_class = CustomPagination
@@ -130,7 +134,7 @@ class UserDetailView(
             raise NotFound("유저 정보를 찾을 수 없습니다. 확인 후 다시 시도해주세요.")
 
     @swagger_auto_schema(
-        operation_summary="사용자 정보",
+        operation_summary="사용자 정보(*)",
         responses={status.HTTP_200_OK: UserDetailSerializer()},
     )
     def get(self, request, pk):
@@ -139,13 +143,17 @@ class UserDetailView(
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
-        operation_summary="사용자 정보 수정",
+        operation_summary="사용자 정보 수정(*)",
         request_body=UserDetailUpdateSerializer(),
         responses={status.HTTP_200_OK: "사용자 정보 수정 완료"},
     )
     @transaction.atomic
     def patch(self, request, pk):
-        user = self.get_queryset(pk=pk)
+        try:
+            user = self.get_queryset(pk=pk)
+        except:
+            raise ValidateException("사용자 정보를 찾을 수 없습니다. 다시 시도해주세요.")
+
         serializer = UserDetailUpdateSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
@@ -153,7 +161,7 @@ class UserDetailView(
         return Response(msg)
 
     @swagger_auto_schema(
-        operation_summary="사용자 삭제",
+        operation_summary="사용자 삭제(*)",
         responses={status.HTTP_200_OK: "사용자 정보가 삭제되었습니다."},
     )
     @transaction.atomic
@@ -166,13 +174,18 @@ class UserDetailView(
 
 
 class UserApproveView(generics.GenericAPIView, mixins.UpdateModelMixin):
-    permission_classes = [AllowAny]
+    """
+    사용자 승인 요청(*)
+
+
+    ---
+    어드민 전용 API
+    """
+
+    permission_classes = [IsAuthenticated, AdminPermission]
     queryset = User.objects.all()
     serializer_class = UserApproveSerializer
 
-    @swagger_auto_schema(
-        operation_summary="사용자 승인 요청",
-    )
     @transaction.atomic
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
