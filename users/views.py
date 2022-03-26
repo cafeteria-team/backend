@@ -23,6 +23,7 @@ from .serializers import (
     UserSignInSerializer,
     UserDetailSerializer,
     UserDetailUpdateSerializer,
+    UserPasswordUpdateSerializer,
     CustomTokenRefreshSerializer,
     UserApproveSerializer,
 )
@@ -187,5 +188,19 @@ class UserApproveView(generics.GenericAPIView, mixins.UpdateModelMixin):
     serializer_class = UserApproveSerializer
 
     @transaction.atomic
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+
+class UserPasswordUpdateView(generics.GenericAPIView, mixins.UpdateModelMixin):
+
+    queryset = User.objects.all()
+    serializer_class = UserPasswordUpdateSerializer
+    permission_class = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_summary="사용자 비밀번호 변경(*)",
+        responses={status.HTTP_200_OK: "사용자 비밀번호가 변경되었습니다."},
+    )
     def patch(self, request, *args, **kwargs):
         return self.partial_update(request, *args, **kwargs)
