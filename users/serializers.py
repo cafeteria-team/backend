@@ -187,6 +187,7 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
         instance.store.busi_num = validated_data["store"]["busi_num"]
         instance.store.busi_num_img = validated_data["store"]["busi_num_img"]
         instance.save()
+        instance.store.save()
         return instance
 
 

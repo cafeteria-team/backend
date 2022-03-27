@@ -158,8 +158,7 @@ class UserDetailView(
         serializer = UserDetailUpdateSerializer(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        msg = {"msg": "사용자 정보가 수정되었습니다."}
-        return Response(msg)
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_summary="사용자 삭제(*)",
