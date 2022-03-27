@@ -67,4 +67,4 @@ class FacilityRegisterView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
-        return Response("200")
+        return Response(FacilityMessages.CREAT_SUCCESS)
