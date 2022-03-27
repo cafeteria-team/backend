@@ -102,6 +102,7 @@ PROJECT_APPS = [
     "phone",
     "store",
     "users",
+    "notice",
 ]
 
 DJANGO_APPS = [
