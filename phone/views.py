@@ -103,7 +103,6 @@ class SmsAuth(generics.GenericAPIView):
 
 
 class PhoneAuthFindPasswordView(generics.GenericAPIView):
-    queryset = PhoneAuthLog.objects.exclude(confirmed=True)
     serializer_class = AuthPhoneFindPasswordSerializer
     permission_classes = [AllowAny]
 
