@@ -42,7 +42,7 @@ class PhoneManager:
         )
         return signingKey
 
-    def send_sms(self, phone_num):
+    def send_sms(self, phone_num, purpose):
         """Call SMS api(SENS: Naver Cloud)"""
         timestamp = str(int(time.time() * 1000))
         signing_key = self.make_signature()
@@ -69,6 +69,8 @@ class PhoneManager:
         res = requests.post(sms_url, headers=headers, data=encoded_data)
 
         if res.status_code == status.HTTP_202_ACCEPTED:
-            PhoneAuthLog.objects.create(auth_num=auth_num, phone_num=phone_num)
+            PhoneAuthLog.objects.create(
+                auth_num=auth_num, phone_num=phone_num, purpose=purpose
+            )
         else:
             raise ValidateException(PhoneMessages.SMS_SEND_ERROR)

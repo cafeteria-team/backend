@@ -18,3 +18,9 @@ class AuthPhoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = PhoneAuthLog
         fields = ["phone_num"]
+
+
+class AuthPhoneFindPasswordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PhoneAuthLog
+        fields = ["phone_num"]
