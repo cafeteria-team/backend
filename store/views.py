@@ -6,14 +6,14 @@ from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
 
-from core.exceptions.exceptions import ValidateException
+from core.exceptions.exceptions import ValidateException, DuplicationException
 
 from .models import Facility
 from .serializers import FacilityListSerializer, FacilityRegisterSerializer
 from .messages import FacilityMessages
 
 
-class FacilityView(generics.GenericAPIView):
+class FacilityView(generics.ListCreateAPIView):
     """
     편의시설 및 서비스(*)
 
@@ -21,32 +21,29 @@ class FacilityView(generics.GenericAPIView):
     ---
     """
 
-    queryset = Facility.objects.all()
-    serializer_class = FacilityListSerializer
     permission_class = [IsAuthenticated]
+    lookup_url_kwarg = "store_id"
 
-    def get(self, request, *args, **kwargs):
-        store_id = kwargs.get("store_id", None)
+    def get_queryset(self):
+        store_id = self.kwargs.get(self.lookup_url_kwarg, "None")
+        if getattr(self, "swagger_fake_view", False):
+            return Facility.objects.none()
 
         if store_id == None:
-            raise ValidateException(FacilityMessages.STORE_ID_PARAM_ERROR)
+            raise ValidateException(FacilityMessages.GET_FACILITY_ERROR)
+        queryset = Facility.objects.filter(store_id=store_id, deleted=False)
 
-        queryset = self.get_queryset().filter(store_id=store_id, deleted=False)
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(status=status.HTTP_200_OK, data=serializer.data)
+        return queryset
 
+    def get_serializer_class(self):
+        method = self.request.method
+        if method == "GET":
+            return FacilityListSerializer
+        elif method == "POST":
+            return FacilityRegisterSerializer
 
-class FacilityRegisterView(generics.CreateAPIView):
-    """
-    편의시설 및 서비스
-
-
-    ---
-    """
-
-    queryset = Facility.objects.all()
-    serializer_class = FacilityRegisterSerializer
-    permission_class = [IsAuthenticated]
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
 
     @swagger_auto_schema(
         request_body=FacilityRegisterSerializer(many=True),
@@ -54,7 +51,9 @@ class FacilityRegisterView(generics.CreateAPIView):
     )
     @transaction.atomic
     def post(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
         facilities = request.data
+        store_id = kwargs.get("store_id", None)
 
         for facility in facilities:
             count = facilities.count(facility)
@@ -63,8 +62,17 @@ class FacilityRegisterView(generics.CreateAPIView):
                     FacilityMessages.FACILITY_CONFICT_ERROR.format(facility["name"])
                 )
 
+            facility_exists = queryset.filter(name=facility["name"])
+
+            if facility_exists.exists():
+                raise DuplicationException(
+                    FacilityMessages.ALREADY_EXISTS_ERROR.format(
+                        facility["name"], facility["name"]
+                    )
+                )
+
         serializer = self.get_serializer(data=facilities, many=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        serializer.save(store_id=store_id)
 
         return Response(FacilityMessages.CREAT_SUCCESS)
