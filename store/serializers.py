@@ -25,7 +25,7 @@ class FacilityListSerializer(serializers.ModelSerializer):
 class FacilityRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Facility
-        fields = ["store", "name"]
+        fields = ["name"]
 
 
 class MemberStoreSerializer(serializers.ModelSerializer):
