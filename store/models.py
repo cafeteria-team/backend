@@ -21,8 +21,21 @@ class Store(models.Model):
 
 
 class Facility(TimeStampModel):
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name="facility")
-    name = models.CharField(max_length=24)
+    class FacilityCategory(models.TextChoices):
+        CAFE = "CAFE", _("카페")
+        COFFEE = "COFFEE", _("커피")
+        CONVEIENCE = "CONVEIENCE", _("편의점")
+        NOODEL = "NOODEL", _("면")
+        BREAD = "BREAD", _("빵")
+        BEVERAGE = "BEVERAGE", _("음료")
+
+    name = models.CharField(max_length=24, verbose_name="편의시설 이름")
+    category = models.CharField(
+        max_length=15,
+        choices=FacilityCategory.choices,
+        verbose_name="편의시설 카테고리",
+        default="",
+    )
     deleted = models.BooleanField(default=False)
 
     class Meta:
