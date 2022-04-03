@@ -16,16 +16,23 @@ class StoreSerializer(serializers.ModelSerializer):
         ]
 
 
-class FacilityListSerializer(serializers.ModelSerializer):
+class FacilityAdminSerializer(serializers.ModelSerializer):
     class Meta:
         model = Facility
-        exclude = ["created", "updated", "deleted"]
+        exclude = ["deleted"]
+        read_only_fields = ["created", "updated"]
 
 
-class FacilityRegisterSerializer(serializers.ModelSerializer):
+class FacilityAdminRegisterSerializer(serializers.ModelSerializer):
     class Meta:
         model = Facility
-        fields = ["name"]
+        fields = ["category", "name"]
+
+
+class FacilityAdminDetailUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Facility
+        fields = ["category", "name"]
 
 
 class MemberStoreSerializer(serializers.ModelSerializer):
