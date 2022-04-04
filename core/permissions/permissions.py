@@ -7,6 +7,10 @@ class AdminPermission(BasePermission):
 
     def has_permission(self, request, view):
         user_roles = User.UserRoles
+
+        if request.auth == None:
+            return False
+
         if request.user.role == user_roles.ADMIN:
             return True
 
