@@ -5,10 +5,15 @@ from .messages import FacilityMessages
 
 
 class FacilityManager:
-    def exists_check(self, data):
+    def exists_check(self, data, facility_id=None):
         category = data["category"]
         name = data["name"]
-        facility = Facility.objects.filter(name=name, category=category)
+        if facility_id == None:
+            facility = Facility.objects.filter(name=name, category=category)
+        else:
+            facility = Facility.objects.exclude(id=facility_id).filter(
+                name=name, category=category
+            )
 
         if facility.exists():
             raise DuplicationException(
