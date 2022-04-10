@@ -14,6 +14,7 @@ schema_url_patterns = [
     path("api/", include("phone.urls")),
     path("api/", include("store.urls")),
     path("api/", include("notice.urls")),
+    path("api/", include("file.urls")),
 ]
 
 schema_view_v1 = get_schema_view(
@@ -53,4 +54,5 @@ urlpatterns = [
     path("api/", include("phone.urls")),
     path("api/", include("store.urls")),
     path("api/", include("notice.urls")),
+    path("api/", include("file.urls")),
 ] + swagger_urlpatterns
