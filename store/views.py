@@ -32,7 +32,7 @@ class FacilityAdminView(generics.ListCreateAPIView):
 
     def get_permissions(self):
         if self.request.method == "GET":
-            permission_classes = [IsAuthenticated]
+            permission_classes = [AllowAny]
         else:
             permission_classes = [AdminPermission]
 
@@ -63,7 +63,7 @@ class FacilityAdminDetailView(
 ):
     queryset = Facility.objects.all()
     serializer_class = FacilityAdminDetailUpdateSerializer
-    permission_class = [AdminPermission]
+    permission_class = [AllowAny]
     lookup_field = "id"
     lookup_url_kwarg = "facility_id"
 
@@ -77,4 +77,5 @@ class FacilityAdminDetailView(
     def delete(self, request, *args, **kwargs):
         instance = self.get_object()
         instance.deleted = True
+        instance.save()
         return Response(FacilityMessages.DELETE_SUCCESS)
