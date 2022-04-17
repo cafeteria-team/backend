@@ -41,3 +41,22 @@ class Facility(TimeStampModel):
     class Meta:
         db_table = "facility"
         verbose_name_plural = "facility"
+
+
+class JoinFacility(TimeStampModel):
+    store = models.ForeignKey(
+        Store,
+        on_delete=models.CASCADE,
+        related_name="store_facility",
+        verbose_name="업체",
+    )
+    facility = models.ForeignKey(
+        Facility,
+        on_delete=models.CASCADE,
+        related_name="join_facility",
+        verbose_name="편의시설",
+    )
+
+    class Meta:
+        db_table = "join_facility"
+        verbose_name_plural = "join_facility"
