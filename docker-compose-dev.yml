@@ -2,7 +2,11 @@ version: "3"
 
 services:
   api_server:
+<<<<<<< HEAD
     image: tpdnrzz/good-cafeteria:0.1.26
+=======
+    image: tpdnrzz/good-cafeteria:0.1.27
+>>>>>>> feature/facility/select-facility-user
     command: python manage.py runserver 0.0.0.0:8000 --settings=config.settings.dev
     container_name: api_server
     ports:

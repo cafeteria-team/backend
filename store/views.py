@@ -5,15 +5,20 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from drf_yasg.utils import swagger_auto_schema
+from core.exceptions.exceptions import ValidateException
 
 from core.permissions.permissions import AdminPermission
 from store.messages import FacilityMessages
+from store.models import Store
+from users.models import User
 
-from .models import Facility
+from .models import Facility, JoinFacility
 from .serializers import (
     FacilityAdminSerializer,
     FacilityAdminRegisterSerializer,
     FacilityAdminDetailUpdateSerializer,
+    StoreWithFacility,
+    JoinFacilityCreateSerializer,
 )
 
 from .manager import FacilityManager
@@ -61,6 +66,13 @@ class FacilityAdminView(generics.ListCreateAPIView):
 class FacilityAdminDetailView(
     generics.GenericAPIView, mixins.UpdateModelMixin, mixins.DestroyModelMixin
 ):
+    """
+    편의시설 및 서비스(*)
+
+
+    ---
+    """
+
     queryset = Facility.objects.all()
     serializer_class = FacilityAdminDetailUpdateSerializer
     permission_class = [AllowAny]
@@ -79,3 +91,56 @@ class FacilityAdminDetailView(
         instance.deleted = True
         instance.save()
         return Response(FacilityMessages.DELETE_SUCCESS)
+
+
+class FacilityJoinView(
+    generics.GenericAPIView, mixins.RetrieveModelMixin, mixins.CreateModelMixin
+):
+    queryset = Store.objects.all()
+    lookup_field = "id"
+    lookup_url_kwarg = "store_id"
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return StoreWithFacility
+        else:
+            return JoinFacilityCreateSerializer
+
+    @swagger_auto_schema(operation_summary="업체 편의시설 리스트(*)")
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(operation_summary="업체 편의시설 등록(*)")
+    def post(self, request, *args, **kwargs):
+        store_id = kwargs.get("store_id", None)
+        if store_id == None:
+            raise ValidateException("S")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(store_id=store_id)
+
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+
+class FacilityJoinDetailView(generics.DestroyAPIView):
+    def get_object(self):
+        kwargs = self.request.parser_context.get("kwargs", None)
+
+        if kwargs == None:
+            raise ValidateException(
+                "Need store_id and join_facility_id is required in path"
+            )
+
+        try:
+            join_facility = JoinFacility.objects.get(
+                store_id=kwargs["store_id"], id=kwargs["join_facility_id"]
+            )
+        except:
+            raise ValidateException("Join facility not found")
+
+        return join_facility
+
+    @swagger_auto_schema(operation_summary="업체 편의시설 삭제(*)")
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
