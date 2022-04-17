@@ -16,5 +16,14 @@ class NoticeCreateSerializer(serializers.ModelSerializer):
             "subject",
             "content",
             "view",
-            "created_by",
+        ]
+
+
+class NoticeUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Notice
+        fields = [
+            "subject",
+            "content",
+            "view",
         ]
