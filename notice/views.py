@@ -6,12 +6,19 @@ from rest_framework.permissions import IsAuthenticated
 
 from drf_yasg.utils import swagger_auto_schema
 
-from core.exceptions.exceptions import ValidateException, NotFoundException
-from .models import Notice
+from core.exceptions.exceptions import ValidateException
+from core.permissions.permissions import AdminPermission
+from core.pagination.pagination import CustomPagination
+
+from .models import Notice, NoticeAdmin
+
 from .serializers import (
     NoticeSerializer,
     NoticeCreateSerializer,
     NoticeUpdateSerializer,
+    NoticeAdminSerializer,
+    NoticeAdminCreateSerializer,
+    NoticeAdminUpdateSerializer,
 )
 
 
@@ -24,6 +31,7 @@ class NoticeView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     lookup_field = "store_id"
     lookup_url_kwarg = "store_id"
+    pagination_class = CustomPagination
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == "GET":
@@ -74,6 +82,62 @@ class NoticeDetailView(
             raise ValidateException("Notice not found")
 
         return notice
+
+    @swagger_auto_schema(operation_summary="공지사항 수정(*)")
+    @transaction.atomic
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(operation_summary="공지사항 삭제(*)")
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.deleted = True
+        instance.save()
+        return Response("200")
+
+
+class NoticeAdminView(generics.ListCreateAPIView):
+    """
+    공지사항 검색(*)
+    """
+
+    queryset = NoticeAdmin.objects.exclude(deleted=True)
+    permission_classes = [AdminPermission]
+    pagination_class = CustomPagination
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method == "GET":
+            return NoticeAdminSerializer
+        elif self.request.method == "POST":
+            return NoticeAdminCreateSerializer
+
+    @swagger_auto_schema(operation_summary="어드민 공지사항 리스트(*)")
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+    @swagger_auto_schema(operation_summary="어드민 공지사항 등록(*)")
+    @transaction.atomic
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(created_by=user)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+
+class NoticeAdminDetailView(
+    generics.GenericAPIView, mixins.UpdateModelMixin, mixins.DestroyModelMixin
+):
+    queryset = NoticeAdmin.objects.all()
+    permission_classes = [AdminPermission]
+    lookup_field = "id"
+    lookup_url_kwarg = "notice_id"
+
+    def get_serializer_class(self, *args, **kwargs):
+        if self.request.method == "PATCH":
+            return NoticeAdminUpdateSerializer
 
     @swagger_auto_schema(operation_summary="공지사항 수정(*)")
     @transaction.atomic
