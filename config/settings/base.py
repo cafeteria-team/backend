@@ -104,6 +104,7 @@ PROJECT_APPS = [
     "users",
     "notice",
     "file",
+    "menu",
 ]
 
 DJANGO_APPS = [
