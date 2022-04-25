@@ -6,6 +6,12 @@ from .models import Store, Facility, JoinFacility
 
 
 class StoreSerializer(serializers.ModelSerializer):
+    facilities = serializers.SerializerMethodField()
+
+    def get_facilities(self, obj):
+        store_facilities = obj.store_facility.all()
+        return [item.facility.name for item in store_facilities]
+
     class Meta:
         model = Store
 
@@ -16,6 +22,7 @@ class StoreSerializer(serializers.ModelSerializer):
             "detail_addr",
             "busi_num",
             "busi_num_img",
+            "facilities",
         ]
 
 
@@ -83,3 +90,9 @@ class StoreWithFacility(serializers.ModelSerializer):
     class Meta:
         model = Store
         fields = ["store_facility"]
+
+
+class StorePriceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Store
+        fields = ["price"]
