@@ -49,7 +49,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=128, source="store.name")
     addr = serializers.CharField(max_length=128, source="store.addr")
     zip_code = serializers.CharField(max_length=6, source="store.zip_code")
-    detail_addr = serializers.CharField(max_length=128, source="store.detail_addr")
+    detail_addr = serializers.CharField(
+        max_length=128, source="store.detail_addr", required=False
+    )
     busi_num = serializers.CharField(
         max_length=10, source="store.busi_num", required=False
     )
