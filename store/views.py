@@ -10,7 +10,6 @@ from core.exceptions.exceptions import ValidateException
 from core.permissions.permissions import AdminPermission
 from store.messages import FacilityMessages
 from store.models import Store
-from users.models import User
 
 from .models import Facility, JoinFacility
 from .serializers import (
@@ -19,6 +18,7 @@ from .serializers import (
     FacilityAdminDetailUpdateSerializer,
     StoreWithFacility,
     JoinFacilityCreateSerializer,
+    StorePriceSerializer,
 )
 
 from .manager import FacilityManager
@@ -144,3 +144,38 @@ class FacilityJoinDetailView(generics.DestroyAPIView):
     @swagger_auto_schema(operation_summary="업체 편의시설 삭제(*)")
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
+
+class StorePriceView(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+):
+    queryset = Store.objects.all()
+    serializer_class = StorePriceSerializer
+    lookup_field = "id"
+    lookup_url_kwarg = "store_id"
+
+    @swagger_auto_schema(operation_summary="가격 정보(*)")
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(operation_summary="가격 생성(*)")
+    def post(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(operation_summary="가격 수정(*)")
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @swagger_auto_schema(operation_summary="가격 일괄 삭제(*)")
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.price = None
+        instance.save()
+
+        data = {"price": instance.price}
+
+        return Response(data=data, status=status.HTTP_200_OK)

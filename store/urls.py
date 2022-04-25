@@ -5,6 +5,7 @@ from .views import (
     FacilityAdminDetailView,
     FacilityJoinView,
     FacilityJoinDetailView,
+    StorePriceView,
 )
 
 urlpatterns = [
@@ -27,5 +28,10 @@ urlpatterns = [
         "facility/join/<int:store_id>/<int:join_facility_id>",
         FacilityJoinDetailView.as_view(),
         name="facility_join",
+    ),
+    path(
+        "store/<int:store_id>/price",
+        StorePriceView.as_view(),
+        name="store_price",
     ),
 ]
