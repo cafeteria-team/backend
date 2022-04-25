@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.contrib.postgres.fields import ArrayField
 
 from users.models import User
 from core.models import TimeStampModel
@@ -12,8 +13,8 @@ class Store(models.Model):
     zip_code = models.CharField(max_length=6)
     detail_addr = models.CharField(max_length=128, blank=True)
     busi_num = models.CharField(max_length=10)
-    busi_num_img = models.CharField(max_length=256)
-    price = models.JSONField(default=dict)
+    busi_num_img = models.CharField(max_length=256, blank=True)
+    price = ArrayField(models.JSONField(default=dict), blank=True, null=True)
 
     class Meta:
         db_table = "store"
