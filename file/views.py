@@ -11,6 +11,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 
 from .messages import FileMessage
+from .manager import FileManager
 
 
 class FileUploadView(generics.GenericAPIView):
@@ -38,11 +39,8 @@ class FileUploadView(generics.GenericAPIView):
         responses={status.HTTP_200_OK: FileMessage.UPLOAD_SUCCESS},
     )
     def post(self, request, *args, **kwargs):
-        s3_client = boto3.client(
-            "s3",
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        )
+        file_manager = FileManager()
+        s3_client = file_manager.get_s3_client()
         files = request.FILES.getlist("files")
 
         for file in files:
