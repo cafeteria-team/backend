@@ -36,6 +36,7 @@ class UserSignInSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
         token["user_id"] = user.id
+        token["user_role"] = user.role
         return token
 
 
