@@ -1,9 +1,14 @@
 from django.db import models
+
 from core.models import TimeStampModel
 from users.models import User
+from store.models import Store
 
 
 class Notice(TimeStampModel):
+    store = models.OneToOneField(
+        Store, on_delete=models.CASCADE, related_name="notice", verbose_name="업체"
+    )
     subject = models.CharField(max_length=100, verbose_name="제목")
     content = models.TextField(verbose_name="내용")
     view = models.BooleanField(verbose_name="공개 여부")

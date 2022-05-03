@@ -103,6 +103,8 @@ PROJECT_APPS = [
     "store",
     "users",
     "notice",
+    "file",
+    "menu",
 ]
 
 DJANGO_APPS = [
@@ -245,6 +247,11 @@ SWAGGER_SETTINGS = {
     },
 }
 
+AWS_ACCESS_KEY_ID = SECRET["AWS_ACCESS_KEY_ID"]
+AWS_SECRET_ACCESS_KEY = SECRET["AWS_SECRET_ACCESS_KEY"]
+AWS_REGION = SECRET["REGION"]
+AWS_STORAGE_BUCKET_NAME = SECRET["AWS_STORAGE_BUCKET_NAME"]
+AWS_S3_CUSTOM_DOMAIN = f"s3.{AWS_REGION}.amazonaws.com/{AWS_STORAGE_BUCKET_NAME}"
 
 # Naver Cloud 정보
 SMS_ACCESS_KEY = SECRET["sms_access_key"]
