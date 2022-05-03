@@ -6,7 +6,7 @@ from store.models import Store
 
 
 class Notice(TimeStampModel):
-    store = models.ForeignKey(
+    store = models.OneToOneField(
         Store, on_delete=models.CASCADE, related_name="notice", verbose_name="업체"
     )
     subject = models.CharField(max_length=100, verbose_name="제목")
