@@ -22,12 +22,16 @@ from .serializers import (
 )
 
 
-class NoticeView(generics.ListCreateAPIView):
+class NoticeView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+):
     """
     공지사항 검색(*)
     """
 
-    queryset = Notice.objects.exclude(deleted=True)
+    queryset = Notice.objects.all()
     permission_classes = [IsAuthenticated]
     lookup_field = "store_id"
     lookup_url_kwarg = "store_id"
@@ -41,7 +45,7 @@ class NoticeView(generics.ListCreateAPIView):
 
     @swagger_auto_schema(operation_summary="공지사항 리스트(*)")
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        return self.retrieve(request, *args, **kwargs)
 
     @swagger_auto_schema(operation_summary="공지사항 등록(*)")
     @transaction.atomic
@@ -52,11 +56,14 @@ class NoticeView(generics.ListCreateAPIView):
         if store_id == None:
             raise ValidateException("Store id is required in path")
 
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(store_id=store_id, created_by=user)
-
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
+        try:
+            Notice.objects.get(store_id=store_id)
+            return self.partial_update(request, *args, **kwargs)
+        except Notice.DoesNotExist:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(store_id=store_id, created_by=user)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 class NoticeDetailView(

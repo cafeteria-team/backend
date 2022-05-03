@@ -85,7 +85,13 @@ class JoinFacilityCreateSerializer(serializers.ModelSerializer):
 
 
 class StoreWithFacility(serializers.ModelSerializer):
-    store_facility = JoinFacilitySerializer(many=True)
+    store_facility = serializers.SerializerMethodField()
+
+    def get_store_facility(self, obj):
+        join_facility = JoinFacility.objects.filter(store=obj, facility__deleted=False)
+        serializer = JoinFacilitySerializer(data=join_facility, many=True)
+        serializer.is_valid()
+        return serializer.data
 
     class Meta:
         model = Store
