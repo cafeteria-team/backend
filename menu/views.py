@@ -6,8 +6,11 @@ from drf_yasg.utils import swagger_auto_schema
 
 from core.exceptions.exceptions import ValidateException
 from core.pagination.pagination import CustomPagination
+
 from .models import Menu
 from .serializers import MenuSerializer, MenuCreateSerializer, MenuUpdateSerializer
+
+from .filters import MenuFilter
 
 
 class MenuView(generics.ListCreateAPIView):
@@ -15,6 +18,7 @@ class MenuView(generics.ListCreateAPIView):
     lookup_field = "store_id"
     lookup_url_kwarg = "store_id"
     pagination_class = CustomPagination
+    filterset_class = MenuFilter
 
     def get_serializer_class(self, *args, **kwargs):
         if self.request.method == "GET":
