@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.response import Response
 
 from core.exceptions.exceptions import DuplicationException
 
@@ -82,6 +83,10 @@ class JoinFacilityCreateSerializer(serializers.ModelSerializer):
             raise DuplicationException("The facility is already registered")
         except JoinFacility.DoesNotExist:
             return super().create(validated_data)
+
+    def to_representation(self, instance):
+        join_facility = JoinFacilitySerializer(instance)
+        return join_facility.data
 
 
 class StoreWithFacility(serializers.ModelSerializer):
