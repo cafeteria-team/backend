@@ -73,8 +73,7 @@ class UserLoginView(TokenObtainPairView):
             return super().post(request, *args, **kwargs)
 
         else:
-            data = {"msg": "사용자 계정이 활성화 되지 않았습니다. 관리자에게 문의하세요."}
-            return Response(data=data, status=status.HTTP_200_OK)
+            raise ValidateException("사용자 계정이 활성화 되지 않았습니다. 관리자에게 문의하세요.")
 
 
 class CustomUserRefreshTokenView(TokenRefreshView):
