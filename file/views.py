@@ -43,14 +43,24 @@ class FileUploadView(generics.GenericAPIView):
         s3_client = file_manager.get_s3_client()
         files = request.FILES.getlist("files")
 
+        results = []
+
         for file in files:
+            s3_path = f"media/{request.user}/{file.name}"
             s3_client.upload_fileobj(
                 file,
                 settings.AWS_STORAGE_BUCKET_NAME,
-                f"media/{request.user}/{file.name}",
+                s3_path,
                 ExtraArgs={
                     "ContentType": file.content_type,
                 },
             )
+            location = s3_client.get_bucket_location(
+                Bucket=settings.AWS_STORAGE_BUCKET_NAME
+            )["LocationConstraint"]
 
-        return Response(FileMessage.UPLOAD_SUCCESS)
+            image_url = f"https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{location}.amazonaws.com/{s3_path}"
+
+            results.append(image_url)
+
+        return Response(data=results, status=status.HTTP_200_OK)
