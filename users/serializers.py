@@ -59,6 +59,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     )
     busi_num_img = serializers.CharField(max_length=256, source="store.busi_num_img")
     confirm_password = serializers.CharField(max_length=128)
+    location = serializers.CharField(source="store.location")
 
     class Meta:
         model = User
@@ -76,6 +77,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "detail_addr",
             "busi_num",
             "busi_num_img",
+            "location",
         ]
 
     def validate(self, attrs):
