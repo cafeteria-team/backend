@@ -1,9 +1,9 @@
-from django.db import models
+from django.contrib.gis.db import models
 from django.utils.translation import gettext_lazy as _
 from django.contrib.postgres.fields import ArrayField
 
-from users.models import User
 from core.models import TimeStampModel
+from users.models import User
 
 # Create your models here.
 class Store(models.Model):
@@ -15,6 +15,7 @@ class Store(models.Model):
     busi_num = models.CharField(max_length=10)
     busi_num_img = models.CharField(max_length=256, blank=True)
     price = ArrayField(models.JSONField(default=dict), blank=True, null=True)
+    location = models.PointField(srid=4326)
 
     class Meta:
         db_table = "store"
