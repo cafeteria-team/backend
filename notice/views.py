@@ -106,7 +106,7 @@ class NoticeDetailView(
         instance = self.get_object()
         instance.deleted = True
         instance.save()
-        return Response("200")
+        return Response(status=status.HTTP_200_OK)
 
 
 class NoticeAdminView(generics.ListCreateAPIView):
@@ -115,7 +115,7 @@ class NoticeAdminView(generics.ListCreateAPIView):
     """
 
     queryset = NoticeAdmin.objects.exclude(deleted=True)
-    permission_classes = [AdminPermission]
+    permission_classes = [AllowAny]
     pagination_class = CustomPagination
 
     def get_serializer_class(self, *args, **kwargs):
@@ -144,7 +144,7 @@ class NoticeAdminDetailView(
     generics.GenericAPIView, mixins.UpdateModelMixin, mixins.DestroyModelMixin
 ):
     queryset = NoticeAdmin.objects.all()
-    permission_classes = [AdminPermission]
+    permission_classes = [AllowAny]
     lookup_field = "id"
     lookup_url_kwarg = "notice_id"
 
@@ -162,4 +162,4 @@ class NoticeAdminDetailView(
         instance = self.get_object()
         instance.deleted = True
         instance.save()
-        return Response("200")
+        return Response(status=status.HTTP_200_OK)
