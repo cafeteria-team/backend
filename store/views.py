@@ -114,7 +114,7 @@ class FacilityJoinView(
     def post(self, request, *args, **kwargs):
         store_id = kwargs.get("store_id", None)
         if store_id == None:
-            raise ValidateException("S")
+            raise ValidateException("Store id is required!")
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
