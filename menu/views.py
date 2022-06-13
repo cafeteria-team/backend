@@ -1,14 +1,30 @@
 from datetime import datetime, timedelta
 
+from django.contrib.gis.measure import D
+from django.contrib.gis.geos import Point
+from django.contrib.gis.db.models.functions import Distance
+
 from rest_framework import generics, status, mixins
 from rest_framework.response import Response
+
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.openapi import Parameter
+from drf_yasg.openapi import IN_QUERY
 
 from core.exceptions.exceptions import ValidateException
 from core.pagination.pagination import CustomPagination
 
+from menu.models import Menu
+
+from util.trans_date import TransDate
+
 from .models import Menu
-from .serializers import MenuSerializer, MenuCreateSerializer, MenuUpdateSerializer
+from .serializers import (
+    MenuSerializer,
+    MenuCreateSerializer,
+    MenuUpdateSerializer,
+    NearbyTodayMenuSerializer,
+)
 
 from .filters import MenuFilter
 
@@ -77,5 +93,61 @@ class MenuTodayListView(generics.ListAPIView):
         return queryset
 
     @swagger_auto_schema(operation_summary="메뉴 리스트(오늘)(*)")
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
+class NearbyTodayMenusView(generics.ListAPIView):
+    serializer_class = NearbyTodayMenuSerializer
+    pagination_class = CustomPagination
+
+    lat_param = Parameter(
+        "lat",
+        IN_QUERY,
+        type="string",
+        required=True,
+        description="위도",
+    )
+    lon_param = Parameter(
+        "lon",
+        IN_QUERY,
+        type="string",
+        required=True,
+        description="경도",
+    )
+
+    def get_queryset(self):
+        try:
+            lat = float(self.request.GET["lat"])
+        except ValueError:
+            raise ValidateException("Latitude's type must be float")
+
+        try:
+            lon = float(self.request.GET["lon"])
+        except ValueError:
+            raise ValidateException("Longitude's type must be float")
+
+        point = Point(lat, lon, srid=4326)
+
+        trans_date = TransDate(datetime.now())
+        today_start_date = trans_date.get_today_min()
+        today_end_date = trans_date.get_today_max()
+
+        today_menus = (
+            Menu.objects.filter(
+                provide_at__range=(today_start_date, today_end_date),
+                store__location__distance_lte=(point, D(km=5)),
+            )
+            .annotate(distance=Distance("store__location", point))
+            .order_by("distance")
+        )
+        return today_menus
+
+    @swagger_auto_schema(
+        operation_summary="내 주변 구내식당 정보",
+        operation_description="현재 날짜 기준으로 5KM 반경 내에 메뉴가 등록되어 있는 구내삭당들의 메뉴 정보를 가지고 오는 API",
+        manual_parameters=[lat_param, lon_param],
+        tags=["menu"],
+    )
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
