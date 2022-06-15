@@ -24,6 +24,7 @@ class StoreSerializer(serializers.ModelSerializer):
             "busi_num",
             "busi_num_img",
             "facilities",
+            "store_img",
         ]
 
 
@@ -55,7 +56,7 @@ class MemberStoreSerializer(serializers.ModelSerializer):
 class MemberDetailStoreSerialzer(serializers.ModelSerializer):
     class Meta:
         model = Store
-        fields = ["name", "busi_num", "busi_num_img"]
+        fields = ["name", "busi_num", "busi_num_img", "store_img"]
 
 
 class FacilitySerializer(serializers.ModelSerializer):
