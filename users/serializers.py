@@ -57,7 +57,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     busi_num = serializers.CharField(
         max_length=10, source="store.busi_num", required=False
     )
-    busi_num_img = serializers.CharField(max_length=256, source="store.busi_num_img")
+    busi_num_img = serializers.CharField(
+        max_length=256, required=False, source="store.busi_num_img"
+    )
     confirm_password = serializers.CharField(max_length=128)
     location = serializers.CharField(source="store.location")
 
