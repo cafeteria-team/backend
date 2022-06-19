@@ -1,3 +1,4 @@
+from email.policy import default
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import (
@@ -52,13 +53,19 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     addr = serializers.CharField(max_length=128, source="store.addr")
     zip_code = serializers.CharField(max_length=6, source="store.zip_code")
     detail_addr = serializers.CharField(
-        max_length=128, source="store.detail_addr", required=False
+        max_length=128,
+        required=False,
+        allow_blank=True,
+        source="store.detail_addr",
     )
     busi_num = serializers.CharField(
         max_length=10, source="store.busi_num", required=False
     )
     busi_num_img = serializers.CharField(
-        max_length=256, required=False, source="store.busi_num_img"
+        max_length=256,
+        required=False,
+        allow_blank=True,
+        source="store.busi_num_img",
     )
     confirm_password = serializers.CharField(max_length=128)
     location = serializers.CharField(source="store.location")
@@ -81,6 +88,7 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "busi_num_img",
             "location",
         ]
+        optional_fields = ["busi_num_img"]
 
     def validate(self, attrs):
         password = attrs["password"]
@@ -143,7 +151,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
         store = Store(**store_data)
         store.save()
-
         return validated_data
 
 
@@ -213,6 +220,4 @@ class UserPasswordUpdateSerializer(serializers.ModelSerializer):
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
-        print(attrs)
-        print("here")
         return super().validate(attrs)
