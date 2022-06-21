@@ -17,7 +17,7 @@ class Store(models.Model):
     price = ArrayField(models.JSONField(default=dict), blank=True, null=True)
     location = models.PointField(srid=4326)
     store_img = ArrayField(
-        models.CharField(max_length=256, blank=True), size=3, null=True
+        models.CharField(max_length=256, blank=True), size=3, null=True, blank=True
     )
 
     class Meta:
