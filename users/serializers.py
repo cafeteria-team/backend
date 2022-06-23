@@ -38,6 +38,7 @@ class UserSignInSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token["user_id"] = user.id
         token["user_role"] = user.role
+        token["store_id"] = user.store.id
         token["username"] = user.username
         return token
 
