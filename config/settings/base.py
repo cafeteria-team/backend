@@ -92,6 +92,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "django",
     "django_filters",
+    "django.contrib.gis",
     "drf_yasg",
     "requests",
     "rest_framework",
