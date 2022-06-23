@@ -17,6 +17,7 @@ class StoreSerializer(serializers.ModelSerializer):
         model = Store
 
         fields = [
+            "id",
             "name",
             "addr",
             "zip_code",
@@ -25,6 +26,7 @@ class StoreSerializer(serializers.ModelSerializer):
             "busi_num_img",
             "facilities",
             "store_img",
+            "price",
         ]
 
 
