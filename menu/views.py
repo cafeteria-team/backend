@@ -44,7 +44,16 @@ class MenuView(generics.ListCreateAPIView):
 
     @swagger_auto_schema(operation_summary="메뉴 리스트 조회(*)")
     def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
+        store_id = kwargs.get("store_id", None)
+        queryset = self.filter_queryset(self.get_queryset().filter(store_id=store_id))
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
     @swagger_auto_schema(operation_summary="메뉴 생성(*)")
     def post(self, request, *args, **kwargs):
