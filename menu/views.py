@@ -91,11 +91,35 @@ class MenuTodayListView(generics.ListAPIView):
     pagination_class = CustomPagination
 
     def get_queryset(self):
-        # today_start_date = datetime.combine(datetime.today(), datetime.min.time())
-        # today_end_date = datetime.combine(
-        #     datetime.today() + timedelta(days=1), datetime.min.time()
-        # ) - timedelta(seconds=1)
-        queryset = Menu.objects.all()
+        today_start_date = datetime.combine(datetime.today(), datetime.min.time())
+        today_end_date = datetime.combine(
+            datetime.today() + timedelta(days=1), datetime.min.time()
+        ) - timedelta(seconds=1)
+
+        queryset = Menu.objects.filter(
+            provide_at__range=(today_start_date, today_end_date)
+        )
+        return queryset
+
+    @swagger_auto_schema(operation_summary="메뉴 리스트(오늘)(*)")
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+
+
+class MenuTodayListByStoreView(generics.ListAPIView):
+    serializer_class = MenuSerializer
+    pagination_class = CustomPagination
+
+    def get_queryset(self):
+        today_start_date = datetime.combine(datetime.today(), datetime.min.time())
+        today_end_date = datetime.combine(
+            datetime.today() + timedelta(days=1), datetime.min.time()
+        ) - timedelta(seconds=1)
+        store_id = self.kwargs["store_id"]
+
+        queryset = Menu.objects.filter(
+            provide_at__range=(today_start_date, today_end_date), store_id=store_id
+        )
         return queryset
 
     @swagger_auto_schema(operation_summary="메뉴 리스트(오늘)(*)")
