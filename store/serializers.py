@@ -27,6 +27,7 @@ class StoreSerializer(serializers.ModelSerializer):
             "facilities",
             "store_img",
             "price",
+            "location",
         ]
 
 
