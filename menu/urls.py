@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import MenuView, MenuDetailView, MenuTodayListView, NearbyTodayMenusView, MenuTodayListByStoreView
+from .views import MenuView, MenuDetailView, MenuTodayListView, NearbyTodayMenusView
 
 
 urlpatterns = [
@@ -11,7 +11,6 @@ urlpatterns = [
         name="menu_detail",
     ),
     path("menu/today", MenuTodayListView.as_view(), name="menu_today_list"),
-    path("menu/today/<int:store_id>", MenuTodayListByStoreView.as_view(), name="today_menu_list_by_store"),
     path(
         "nearby/today/menus", NearbyTodayMenusView.as_view(), name="nearby_today_menus"
     ),
