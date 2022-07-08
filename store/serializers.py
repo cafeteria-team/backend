@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.response import Response
 
 from core.exceptions.exceptions import DuplicationException
 
@@ -16,6 +17,7 @@ class StoreSerializer(serializers.ModelSerializer):
         model = Store
 
         fields = [
+            "id",
             "name",
             "addr",
             "zip_code",
@@ -23,6 +25,9 @@ class StoreSerializer(serializers.ModelSerializer):
             "busi_num",
             "busi_num_img",
             "facilities",
+            "store_img",
+            "price",
+            "location",
         ]
 
 
@@ -54,7 +59,7 @@ class MemberStoreSerializer(serializers.ModelSerializer):
 class MemberDetailStoreSerialzer(serializers.ModelSerializer):
     class Meta:
         model = Store
-        fields = ["name", "busi_num", "busi_num_img"]
+        fields = ["name", "busi_num", "busi_num_img", "store_img"]
 
 
 class FacilitySerializer(serializers.ModelSerializer):
@@ -82,6 +87,10 @@ class JoinFacilityCreateSerializer(serializers.ModelSerializer):
             raise DuplicationException("The facility is already registered")
         except JoinFacility.DoesNotExist:
             return super().create(validated_data)
+
+    def to_representation(self, instance):
+        join_facility = JoinFacilitySerializer(instance)
+        return join_facility.data
 
 
 class StoreWithFacility(serializers.ModelSerializer):

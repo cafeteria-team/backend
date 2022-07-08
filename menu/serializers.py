@@ -22,3 +22,15 @@ class MenuUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menu
         exclude = ["store", "created", "updated"]
+
+
+class NearbyTodayMenuSerializer(serializers.ModelSerializer):
+    store = StoreSerializer()
+    distance = serializers.SerializerMethodField()
+
+    def get_distance(self, obj):
+        return f"{obj.distance.km:.2f}"[:-1] + "km"
+
+    class Meta:
+        model = Menu
+        fields = "__all__"

@@ -2,12 +2,13 @@ from django.db import transaction
 
 from rest_framework import generics, status, mixins
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 
 from drf_yasg.utils import swagger_auto_schema
-from core.exceptions.exceptions import ValidateException
 
+from core.exceptions.exceptions import ValidateException
 from core.permissions.permissions import AdminPermission
+
 from store.messages import FacilityMessages
 from store.models import Store
 
@@ -114,7 +115,7 @@ class FacilityJoinView(
     def post(self, request, *args, **kwargs):
         store_id = kwargs.get("store_id", None)
         if store_id == None:
-            raise ValidateException("S")
+            raise ValidateException("Store id is required!")
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

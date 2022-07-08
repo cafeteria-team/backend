@@ -92,6 +92,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "django",
     "django_filters",
+    "django.contrib.gis",
     "drf_yasg",
     "requests",
     "rest_framework",
@@ -156,7 +157,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql",
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
         "NAME": SECRET["LOCAL_DB_NAME"],
         "USER": SECRET["LOCAL_DB_USER"],
         "PASSWORD": SECRET["LOCAL_DB_PASSWORD"],
@@ -197,13 +198,13 @@ REST_FRAMEWORK = {
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Seoul"
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)

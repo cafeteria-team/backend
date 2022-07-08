@@ -1,3 +1,4 @@
+from email.policy import default
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.serializers import (
@@ -37,6 +38,7 @@ class UserSignInSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         token["user_id"] = user.id
         token["user_role"] = user.role
+        token["store_id"] = user.store.id
         token["username"] = user.username
         return token
 
@@ -52,13 +54,22 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     addr = serializers.CharField(max_length=128, source="store.addr")
     zip_code = serializers.CharField(max_length=6, source="store.zip_code")
     detail_addr = serializers.CharField(
-        max_length=128, source="store.detail_addr", required=False
+        max_length=128,
+        required=False,
+        allow_blank=True,
+        source="store.detail_addr",
     )
     busi_num = serializers.CharField(
         max_length=10, source="store.busi_num", required=False
     )
-    busi_num_img = serializers.CharField(max_length=256, source="store.busi_num_img")
+    busi_num_img = serializers.CharField(
+        max_length=256,
+        required=False,
+        allow_blank=True,
+        source="store.busi_num_img",
+    )
     confirm_password = serializers.CharField(max_length=128)
+    location = serializers.CharField(source="store.location")
 
     class Meta:
         model = User
@@ -76,7 +87,9 @@ class UserRegisterSerializer(serializers.ModelSerializer):
             "detail_addr",
             "busi_num",
             "busi_num_img",
+            "location",
         ]
+        optional_fields = ["busi_num_img"]
 
     def validate(self, attrs):
         password = attrs["password"]
@@ -139,7 +152,6 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
         store = Store(**store_data)
         store.save()
-
         return validated_data
 
 
@@ -190,6 +202,7 @@ class UserDetailUpdateSerializer(serializers.ModelSerializer):
         instance.store.name = validated_data["store"]["name"]
         instance.store.busi_num = validated_data["store"]["busi_num"]
         instance.store.busi_num_img = validated_data["store"]["busi_num_img"]
+        instance.store.store_img = validated_data["store"]["store_img"]
         instance.save()
         instance.store.save()
         return instance
@@ -208,6 +221,4 @@ class UserPasswordUpdateSerializer(serializers.ModelSerializer):
 
 class CustomTokenRefreshSerializer(TokenRefreshSerializer):
     def validate(self, attrs):
-        print(attrs)
-        print("here")
         return super().validate(attrs)

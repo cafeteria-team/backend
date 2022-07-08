@@ -2,7 +2,7 @@ from django.db import transaction
 
 from rest_framework import generics, status, mixins
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from drf_yasg.utils import swagger_auto_schema
 
@@ -32,7 +32,7 @@ class NoticeView(
     """
 
     queryset = Notice.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     lookup_field = "store_id"
     lookup_url_kwarg = "store_id"
     pagination_class = CustomPagination
@@ -45,7 +45,13 @@ class NoticeView(
 
     @swagger_auto_schema(operation_summary="공지사항 리스트(*)")
     def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance)
+            return Response(serializer.data)
+        except:
+            data = {}
+            return Response(data=data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(operation_summary="공지사항 등록(*)")
     @transaction.atomic
@@ -100,7 +106,7 @@ class NoticeDetailView(
         instance = self.get_object()
         instance.deleted = True
         instance.save()
-        return Response("200")
+        return Response(status=status.HTTP_200_OK)
 
 
 class NoticeAdminView(generics.ListCreateAPIView):
@@ -109,7 +115,7 @@ class NoticeAdminView(generics.ListCreateAPIView):
     """
 
     queryset = NoticeAdmin.objects.exclude(deleted=True)
-    permission_classes = [AdminPermission]
+    permission_classes = [AllowAny]
     pagination_class = CustomPagination
 
     def get_serializer_class(self, *args, **kwargs):
@@ -138,7 +144,7 @@ class NoticeAdminDetailView(
     generics.GenericAPIView, mixins.UpdateModelMixin, mixins.DestroyModelMixin
 ):
     queryset = NoticeAdmin.objects.all()
-    permission_classes = [AdminPermission]
+    permission_classes = [AllowAny]
     lookup_field = "id"
     lookup_url_kwarg = "notice_id"
 
@@ -156,4 +162,4 @@ class NoticeAdminDetailView(
         instance = self.get_object()
         instance.deleted = True
         instance.save()
-        return Response("200")
+        return Response(status=status.HTTP_200_OK)
