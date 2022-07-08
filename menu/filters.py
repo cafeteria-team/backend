@@ -7,6 +7,7 @@ class MenuFilter(drf_filters.FilterSet):
     provide_at = drf_filters.DateFilter(
         method="filter_provide_at", help_text="메뉴 서비스 일자 / 2022-02-19"
     )
+    store_id = drf_filters.BaseInFilter(field_name="store_id")
 
     def filter_provide_at(self, queryset, name, value):
         trans_date = TransDate(value)
