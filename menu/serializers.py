@@ -27,9 +27,13 @@ class MenuUpdateSerializer(serializers.ModelSerializer):
 class NearbyTodayMenuSerializer(serializers.ModelSerializer):
     store = StoreSerializer()
     distance = serializers.SerializerMethodField()
+    today_menu = serializers.SerializerMethodField()
 
     def get_distance(self, obj):
         return f"{obj.distance.km:.2f}"[:-1] + "km"
+
+    def get_today_menu(self, obj):
+        return obj.menus
 
     class Meta:
         model = Menu
