@@ -136,8 +136,8 @@ class NearbyTodayMenusView(generics.ListAPIView):
             lon = float(self.request.GET["lon"])
         except ValueError:
             raise ValidateException("Longitude's type must be float")
-
-        point = Point(lat, lon, srid=4326)
+        
+        point = Point(lon, lat, srid=4326)
 
         trans_date = TransDate(datetime.now())
         today_start_date = trans_date.get_today_min()
