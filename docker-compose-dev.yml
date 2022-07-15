@@ -2,7 +2,7 @@ version: "3"
 
 services:
   api_server:
-    image: tpdnrzz/good-cafeteria:0.1.52
+    image: tpdnrzz/good-cafeteria:0.1.53
     command: python manage.py runserver 0.0.0.0:8000 --settings=config.settings.dev
     container_name: api_server
     ports:
