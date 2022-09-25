@@ -100,6 +100,7 @@ class MenuTodayListView(generics.ListAPIView):
         queryset = Menu.objects.filter(
             provide_at__range=(today_start_date, today_end_date)
         )
+        queryset = Menu.objects.all()
         return queryset
 
     @swagger_auto_schema(operation_summary="메뉴 리스트(오늘)(*)")
